@@ -22,4 +22,4 @@ See `.gsd/REQUIREMENTS.md` for the explicit capability contract, requirement sta
 
 ## Milestone Sequence
 
-- [ ] M001: Bilingual protected learning experience — Add French/Arabic UI and course content, protected inline lesson viewing, and landing-page cleanup.
+- [x] M001: Bilingual protected learning experience — Add French/Arabic UI and course content, protected inline lesson viewing, and landing-page cleanup.

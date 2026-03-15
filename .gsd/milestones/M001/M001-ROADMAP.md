@@ -61,7 +61,7 @@ This milestone is complete only when all are true:
 - [x] **S04: Public landing cleanup** `risk:low` `depends:[S01]`
   > After this: the red-circled anti-piracy marketing block is gone and the landing page still reads cleanly in both languages.
 
-- [ ] **S05: End-to-end integration and polish** `risk:medium` `depends:[S02,S03,S04]`
+- [x] **S05: End-to-end integration and polish** `risk:medium` `depends:[S02,S03,S04]`
   > After this: the bilingual public/admin/student flows work together, and the milestone’s real end-to-end scenarios are rechecked.
 
 ## Boundary Map

@@ -5,9 +5,9 @@ completed_slices:
   - S02
   - S03
   - S04
-active_slices:
   - S05
-completed_at: 2026-03-15T09:01:00Z
+active_slices: []
+completed_at: 2026-03-15T09:21:00Z
 ---
 
 # M001: Bilingual protected learning experience — Summary
@@ -40,9 +40,27 @@ completed_at: 2026-03-15T09:01:00Z
 - Added bilingual regression checks proving the removed section stays absent.
 - Verified with passing `LocaleSwitchTest` and a production Vite build.
 
-## What This Unlocks Next
+### S05 — End-to-end integration and polish
+- Added a milestone-level integration suite covering the assembled guest/admin/candidate flow.
+- Reran the full relevant feature suites and production build successfully.
+- Updated the requirement contract so the milestone’s planned capabilities are now validated.
 
-- S05 can verify the assembled bilingual admin/student flow, private lesson delivery, landing cleanup, and final milestone acceptance together.
+## Final Verification
+
+The following passed in the verification copy under `/mnt/c/temp/auto-gsd-test`:
+
+- `php artisan test --filter=AuthenticationTest`
+- `php artisan test --filter=LocaleSwitchTest`
+- `php artisan test --filter=AdminAccessTest`
+- `php artisan test --filter=AdminCourseTest`
+- `php artisan test --filter=CourseLocalizationTest`
+- `php artisan test --filter=CourseProtectionTest`
+- `php artisan test --filter=MilestoneIntegrationTest`
+- `npm run build`
+
+## Environment Note
+
+A native PHP runtime was not available inside this WSL environment, and browser/curl reachability to the Windows-hosted XAMPP PHP server remained blocked. As a result, milestone closure is based on the strongest reachable automated proof surfaces rather than live browser automation.
 
 ## Drill-Down Paths
 
@@ -50,13 +68,4 @@ completed_at: 2026-03-15T09:01:00Z
 - `.gsd/milestones/M001/slices/S02/S02-SUMMARY.md`
 - `.gsd/milestones/M001/slices/S03/S03-SUMMARY.md`
 - `.gsd/milestones/M001/slices/S04/S04-SUMMARY.md`
-- `.gsd/milestones/M001/slices/S01/tasks/T01-SUMMARY.md`
-- `.gsd/milestones/M001/slices/S01/tasks/T02-SUMMARY.md`
-- `.gsd/milestones/M001/slices/S01/tasks/T03-SUMMARY.md`
-- `.gsd/milestones/M001/slices/S02/tasks/T01-SUMMARY.md`
-- `.gsd/milestones/M001/slices/S02/tasks/T02-SUMMARY.md`
-- `.gsd/milestones/M001/slices/S02/tasks/T03-SUMMARY.md`
-- `.gsd/milestones/M001/slices/S03/tasks/T01-SUMMARY.md`
-- `.gsd/milestones/M001/slices/S03/tasks/T02-SUMMARY.md`
-- `.gsd/milestones/M001/slices/S03/tasks/T03-SUMMARY.md`
-- `.gsd/milestones/M001/slices/S04/tasks/T01-SUMMARY.md`
+- `.gsd/milestones/M001/slices/S05/S05-SUMMARY.md`
