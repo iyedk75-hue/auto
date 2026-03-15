@@ -45,7 +45,7 @@
   - Do: Add Arabic text columns plus any compatibility logic needed for existing French-first data, expose locale-aware content helpers on the model, and write tests that prove French/Arabic selection behavior and missing-Arabic detection.
   - Verify: `php artisan test --filter=CourseLocalizationTest`
   - Done when: The model can represent French and Arabic text distinctly and tests prove the selection contract used by the course page.
-- [ ] **T02: Update admin course create/edit flow for bilingual authoring** `est:1h`
+- [x] **T02: Update admin course create/edit flow for bilingual authoring** `est:1h`
   - Why: The admin must be able to enter Arabic course text before the candidate side can render it.
   - Files: `app/Http/Controllers/AdminCourseController.php`, `resources/views/admin/courses/partials/form.blade.php`, `resources/views/admin/courses/*.blade.php`, `tests/Feature/AdminCourseTest.php`
   - Do: Update validation, persistence, edit hydration, and admin form UI so French and Arabic fields are explicit and translatable, while preserving existing uploads and course metadata.

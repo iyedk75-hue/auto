@@ -1,8 +1,8 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="space-y-3">
-            <p class="kicker">Cours</p>
-            <h2 class="text-4xl font-extrabold tracking-tight text-slate-950">Ajouter un cours</h2>
+            <p class="kicker">{{ __('ui.admin_courses.kicker') }}</p>
+            <h2 class="text-4xl font-extrabold tracking-tight text-slate-950">{{ __('ui.admin_courses.create_title') }}</h2>
         </div>
     </x-slot>
 
@@ -14,8 +14,8 @@
                     @include('admin.courses.partials.form', ['course' => $course, 'categories' => $categories])
 
                     <div class="flex items-center gap-3">
-                        <button type="submit" class="btn-admin-entry">Enregistrer</button>
-                        <a href="{{ route('admin.courses.index') }}" class="btn-ghost">Annuler</a>
+                        <button type="submit" class="btn-admin-entry">{{ __('ui.admin_courses.save') }}</button>
+                        <a href="{{ route('admin.courses.index') }}" class="btn-ghost">{{ __('ui.admin_courses.cancel') }}</a>
                     </div>
                 </form>
             </div>

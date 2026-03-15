@@ -56,8 +56,11 @@ class AdminCourseController extends Controller
             'id' => (string) Str::uuid(),
             'category' => $validated['category'],
             'title' => $validated['title'],
+            'title_ar' => $validated['title_ar'] ?? null,
             'description' => $validated['description'] ?? null,
+            'description_ar' => $validated['description_ar'] ?? null,
             'content' => $validated['content'] ?? null,
+            'content_ar' => $validated['content_ar'] ?? null,
             'cover_path' => $coverPath,
             'duration_minutes' => $validated['duration_minutes'] ?? null,
             'media_path' => $mediaPath,
@@ -69,7 +72,7 @@ class AdminCourseController extends Controller
 
         return redirect()
             ->route('admin.courses.index')
-            ->with('status', 'Cours ajouté avec succès.');
+            ->with('status', __('ui.admin_courses.created'));
     }
 
     public function edit(Course $course): View
@@ -113,8 +116,11 @@ class AdminCourseController extends Controller
         $course->update([
             'category' => $validated['category'],
             'title' => $validated['title'],
+            'title_ar' => $validated['title_ar'] ?? null,
             'description' => $validated['description'] ?? null,
+            'description_ar' => $validated['description_ar'] ?? null,
             'content' => $validated['content'] ?? null,
+            'content_ar' => $validated['content_ar'] ?? null,
             'cover_path' => $coverPath,
             'duration_minutes' => $validated['duration_minutes'] ?? null,
             'media_path' => $mediaPath,
@@ -126,7 +132,7 @@ class AdminCourseController extends Controller
 
         return redirect()
             ->route('admin.courses.index')
-            ->with('status', 'Cours mis à jour avec succès.');
+            ->with('status', __('ui.admin_courses.updated'));
     }
 
     public function destroy(Course $course): RedirectResponse
@@ -135,16 +141,19 @@ class AdminCourseController extends Controller
 
         return redirect()
             ->route('admin.courses.index')
-            ->with('status', 'Cours supprimé.');
+            ->with('status', __('ui.admin_courses.deleted'));
     }
 
     private function validateCourse(Request $request): array
     {
         return $request->validate([
             'title' => ['required', 'string', 'max:255'],
+            'title_ar' => ['nullable', 'string', 'max:255'],
             'category' => ['required', Rule::in(Course::CATEGORIES)],
             'description' => ['nullable', 'string'],
+            'description_ar' => ['nullable', 'string'],
             'content' => ['nullable', 'string'],
+            'content_ar' => ['nullable', 'string'],
             'duration_minutes' => ['nullable', 'integer', 'min:1'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'cover' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
