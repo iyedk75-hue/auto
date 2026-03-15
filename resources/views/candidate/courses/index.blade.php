@@ -3,10 +3,10 @@
         <div class="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
             <div class="classroom-shell">
                 <header class="classroom-header">
-                    <p class="kicker">Classroom</p>
-                    <h2 class="classroom-title">Votre parcours d'apprentissage</h2>
+                    <p class="kicker">{{ __('ui.classroom.kicker') }}</p>
+                    <h2 class="classroom-title">{{ __('ui.classroom.title') }}</h2>
                     <p class="classroom-subtitle">
-                        Accédez aux modules préparés par votre auto-école et avancez à votre rythme.
+                        {{ __('ui.classroom.subtitle') }}
                     </p>
                 </header>
 
@@ -25,23 +25,23 @@
                                 @if ($course->description)
                                     <p>{{ $course->description }}</p>
                                 @else
-                                    <p>Module prêt à démarrer avec vos supports et ressources Massar.</p>
+                                    <p>{{ __('ui.classroom.default_description') }}</p>
                                 @endif
                                 <div class="flex items-center justify-between text-xs font-semibold text-slate-400">
-                                    <span>{{ $course->duration_minutes ? $course->duration_minutes.' min' : 'Durée libre' }}</span>
+                                    <span>{{ $course->duration_minutes ? $course->duration_minutes.' min' : __('ui.classroom.free_duration') }}</span>
                                     @if ($course->pdf_path)
-                                        <span>PDF inclus</span>
+                                        <span>{{ __('ui.classroom.pdf_included') }}</span>
                                     @endif
                                 </div>
                             </div>
                             <div class="classroom-card-footer">
-                                <span class="text-xs font-semibold text-slate-400">Auto-école</span>
-                                <a href="{{ route('courses.show', $course) }}" class="btn-primary">Ouvrir</a>
+                                <span class="text-xs font-semibold text-slate-400">{{ __('ui.classroom.school') }}</span>
+                                <a href="{{ route('courses.show', $course) }}" class="btn-primary">{{ __('ui.classroom.open') }}</a>
                             </div>
                         </article>
                     @empty
                         <div class="rounded-[2rem] border border-dashed border-slate-300 bg-white/70 p-10 text-sm text-slate-500 md:col-span-2 xl:col-span-3">
-                            Aucun cours disponible pour le moment.
+                            {{ __('ui.classroom.empty') }}
                         </div>
                     @endforelse
                 </section>

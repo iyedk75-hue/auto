@@ -48,10 +48,10 @@ class Course extends Model
     public static function categoryLabels(): array
     {
         return [
-            'priority_rules' => 'Priority rules',
-            'traffic_signs' => 'Traffic signs',
-            'driving_safety' => 'Driving safety',
-            'vehicle_basics' => 'Vehicle basics',
+            'priority_rules' => __('ui.classroom.categories.priority_rules'),
+            'traffic_signs' => __('ui.classroom.categories.traffic_signs'),
+            'driving_safety' => __('ui.classroom.categories.driving_safety'),
+            'vehicle_basics' => __('ui.classroom.categories.vehicle_basics'),
         ];
     }
 }

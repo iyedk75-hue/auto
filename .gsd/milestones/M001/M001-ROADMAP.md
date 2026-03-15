@@ -49,7 +49,7 @@ This milestone is complete only when all are true:
 
 ## Slices
 
-- [ ] **S01: Language foundation and RTL shell** `risk:high` `depends:[]`
+- [x] **S01: Language foundation and RTL shell** `risk:high` `depends:[]`
   > After this: a user can switch French/Arabic across public, admin, and candidate chrome, and Arabic layouts render in RTL consistently.
 
 - [ ] **S02: Bilingual course content management** `risk:medium` `depends:[S01]`

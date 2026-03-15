@@ -50,7 +50,7 @@
   - Do: Introduce translation resources, replace hard-coded shell/auth strings with translation keys, add a reusable language switcher in guest and authenticated navigation, and make the base layouts RTL-aware in Arabic mode.
   - Verify: `php artisan test --filter=AuthenticationTest`
   - Done when: Guest/auth pages and shared navigation render in both languages without mixed hard-coded shell labels.
-- [ ] **T03: Localize core dashboards and classroom shell, then verify in browser** `est:1h`
+- [x] **T03: Localize core dashboards and classroom shell, then verify in browser** `est:1h`
   - Why: S01 must hand downstream slices a real locale-aware public/admin/candidate surface, not just hidden plumbing.
   - Files: `resources/views/marketing/massar.blade.php`, `resources/views/candidate/dashboard.blade.php`, `resources/views/admin/dashboard.blade.php`, `resources/views/candidate/courses/index.blade.php`, `resources/views/candidate/courses/show.blade.php`, `resources/css/app.css`
   - Do: Translate the core dashboard and course-shell labels, add any RTL-safe CSS adjustments needed for the sidebar/nav/layout composition, and verify the public/admin/candidate entry flows in a running browser session.

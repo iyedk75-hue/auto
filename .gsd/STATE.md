@@ -1,18 +1,18 @@
 # GSD State
 
 **Active Milestone:** M001 — Bilingual protected learning experience
-**Active Slice:** S01 — Language foundation and RTL shell
-**Active Task:** T03 — Localize core dashboards and classroom shell
-**Phase:** Executing
+**Active Slice:** S02 — Bilingual course content management
+**Active Task:** None — slice plan not written yet
+**Phase:** Ready for slice planning
 
 ## Recent Decisions
-- Shared shell labels use `lang/*/ui.php`, while existing Breeze-style `__()` strings are translated through locale JSON files.
-- The language switcher is a reusable Blade component used in guest and authenticated navigation.
-- Role-specific login validation messages are translated through UI keys instead of hard-coded French strings.
-- Verification continues through the Windows-side repo copy because this WSL environment lacks native PHP tooling.
+- Locale switching, shared translations, and RTL shell behavior are complete in S01.
+- Course category labels are now locale-aware and reusable by later slices.
+- Verification for Laravel work currently uses a Windows-side repo copy because WSL lacks native PHP tooling.
+- Live browser verification is currently constrained by environment networking to the Windows-hosted PHP runtime.
 
 ## Blockers
 - None
 
 ## Next Action
-Translate the public landing shell, admin dashboard, candidate dashboard, and course-shell labels, add any remaining RTL shell fixes, then verify with dashboard tests and browser checks.
+Read `.gsd/milestones/M001/M001-CONTEXT.md`, `.gsd/milestones/M001/M001-ROADMAP.md`, `.gsd/DECISIONS.md`, and `.gsd/milestones/M001/slices/S01/S01-SUMMARY.md`, then create `.gsd/milestones/M001/slices/S02/S02-PLAN.md` for bilingual course data and admin editing.

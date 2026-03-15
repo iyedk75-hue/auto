@@ -24,7 +24,8 @@ class LocaleSwitchTest extends TestCase
             ->get(route('home'))
             ->assertOk()
             ->assertSee('lang="ar"', false)
-            ->assertSee('dir="rtl"', false);
+            ->assertSee('dir="rtl"', false)
+            ->assertSee('المقصورة الرقمية لمدارس السياقة التونسية.');
     }
 
     public function test_guest_can_switch_back_to_french(): void
@@ -41,7 +42,8 @@ class LocaleSwitchTest extends TestCase
             ->get(route('home'))
             ->assertOk()
             ->assertSee('lang="fr"', false)
-            ->assertSee('dir="ltr"', false);
+            ->assertSee('dir="ltr"', false)
+            ->assertSee('Le cockpit digital des auto-écoles tunisiennes.');
     }
 
     public function test_candidate_dashboard_uses_the_selected_locale(): void
@@ -54,7 +56,9 @@ class LocaleSwitchTest extends TestCase
             ->get(route('dashboard'))
             ->assertOk()
             ->assertSee('lang="ar"', false)
-            ->assertSee('dir="rtl"', false);
+            ->assertSee('dir="rtl"', false)
+            ->assertSee('مرحبًا')
+            ->assertSee('اختبار تذكيري ذكي');
     }
 
     public function test_admin_dashboard_uses_the_selected_locale(): void
@@ -67,7 +71,9 @@ class LocaleSwitchTest extends TestCase
             ->get(route('admin.dashboard'))
             ->assertOk()
             ->assertSee('lang="ar"', false)
-            ->assertSee('dir="rtl"', false);
+            ->assertSee('dir="rtl"', false)
+            ->assertSee('لوحة تحكم مسار')
+            ->assertSee('إجراء سريع');
     }
 
     public function test_unsupported_locale_returns_not_found(): void
