@@ -10,7 +10,26 @@ use App\Http\Controllers\CandidateCourseController;
 use App\Http\Controllers\CandidatePaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuizController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/locale/{locale}', function (Request $request, string $locale) {
+    $supportedLocales = config('app.supported_locales', ['fr', 'ar']);
+    $defaultLocale = config('app.locale', 'fr');
+
+    abort_unless(in_array($locale, $supportedLocales, true), 404);
+
+    $request->session()->put('locale', $locale);
+
+    $redirectTo = url()->previous();
+    $currentSwitchUrl = route('locale.switch', ['locale' => $locale], false);
+
+    if (! $redirectTo || str_contains($redirectTo, $currentSwitchUrl)) {
+        $redirectTo = route('home');
+    }
+
+    return redirect($redirectTo)->cookie('massar_locale', $locale, 60 * 24 * 365);
+})->name('locale.switch');
 
 Route::view('/', 'marketing.massar')->name('home');
 Route::view('/massar', 'marketing.massar')->name('marketing.massar');

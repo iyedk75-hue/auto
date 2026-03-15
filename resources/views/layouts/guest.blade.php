@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@php($isRtl = app()->getLocale() === 'ar')
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,7 +16,7 @@
     @php
         $isAdminLogin = request()->routeIs('admin.login*');
     @endphp
-    <body class="app-body theme-guest {{ $isAdminLogin ? 'theme-admin-auth' : 'theme-candidate-auth' }}">
+    <body class="app-body theme-guest {{ $isAdminLogin ? 'theme-admin-auth' : 'theme-candidate-auth' }} {{ $isRtl ? 'locale-rtl' : 'locale-ltr' }}">
         <div class="guest-shell">
             <div class="guest-brand-panel">
                 <a href="{{ route('home') }}" class="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-white/90 text-sky-700 shadow-lg shadow-sky-950/10">
