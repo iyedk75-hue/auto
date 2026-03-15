@@ -51,7 +51,7 @@
   - Do: Update validation, persistence, edit hydration, and admin form UI so French and Arabic fields are explicit and translatable, while preserving existing uploads and course metadata.
   - Verify: `php artisan test --filter=AdminCourseTest`
   - Done when: Admin can create and update bilingual course text without regressing existing course CRUD behavior.
-- [ ] **T03: Render bilingual course text and unavailable state for candidates** `est:45m`
+- [x] **T03: Render bilingual course text and unavailable state for candidates** `est:45m`
   - Why: The milestone promise is not met until Arabic mode actually changes lesson text on the candidate side.
   - Files: `app/Http/Controllers/CandidateCourseController.php`, `resources/views/candidate/courses/show.blade.php`, `lang/fr/ui.php`, `lang/ar/ui.php`, `tests/Feature/CourseLocalizationTest.php`
   - Do: Use the bilingual course contract on the candidate course page, render Arabic text in Arabic mode, show “Arabic not available yet” when Arabic text is missing, and keep French mode unchanged.

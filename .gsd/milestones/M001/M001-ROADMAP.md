@@ -52,7 +52,7 @@ This milestone is complete only when all are true:
 - [x] **S01: Language foundation and RTL shell** `risk:high` `depends:[]`
   > After this: a user can switch French/Arabic across public, admin, and candidate chrome, and Arabic layouts render in RTL consistently.
 
-- [ ] **S02: Bilingual course content management** `risk:medium` `depends:[S01]`
+- [x] **S02: Bilingual course content management** `risk:medium` `depends:[S01]`
   > After this: admin can manage Arabic course text and the course page shows Arabic content or “Arabic not available yet”.
 
 - [ ] **S03: Protected inline learning viewer** `risk:high` `depends:[S01,S02]`

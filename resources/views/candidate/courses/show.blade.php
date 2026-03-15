@@ -5,12 +5,19 @@
                 <div class="classroom-hero-banner" @if ($course->cover_path) style="background-image: linear-gradient(135deg, rgba(15, 23, 42, 0.5), rgba(30, 58, 138, 0.4)), url('{{ Storage::url($course->cover_path) }}'); background-size: cover; background-position: center;" @endif></div>
                 <div class="classroom-hero-content">
                     <span class="classroom-pill">{{ $categoryLabels[$course->category] ?? ucfirst(str_replace('_', ' ', $course->category)) }}</span>
-                    <h2 class="text-4xl font-extrabold tracking-tight text-slate-950">{{ $course->title }}</h2>
+                    <h2 class="text-4xl font-extrabold tracking-tight text-slate-950">{{ $localizedTitle }}</h2>
                     @if ($course->duration_minutes)
                         <p class="text-sm font-semibold text-slate-500">{{ __('ui.classroom.estimated_duration', ['minutes' => $course->duration_minutes]) }}</p>
                     @endif
                 </div>
             </div>
+
+            @if ($showArabicUnavailable)
+                <div class="classroom-section border border-amber-200 bg-amber-50">
+                    <p class="classroom-section-title text-amber-900">{{ __('ui.classroom.arabic_unavailable_title') }}</p>
+                    <p class="classroom-section-text text-amber-800">{{ __('ui.classroom.arabic_unavailable_body') }}</p>
+                </div>
+            @endif
 
             <div class="grid gap-6 lg:grid-cols-[2fr_1fr]">
                 <div class="space-y-6">
@@ -27,7 +34,7 @@
                                         <source src="{{ $mediaUrl }}" type="{{ $course->media_mime ?? 'video/mp4' }}" />
                                     </video>
                                 @else
-                                    <img src="{{ $mediaUrl }}" alt="{{ $course->title }}" class="w-full rounded-3xl object-cover" />
+                                    <img src="{{ $mediaUrl }}" alt="{{ $localizedTitle }}" class="w-full rounded-3xl object-cover" />
                                 @endif
                             </div>
                         </div>
@@ -35,18 +42,18 @@
 
                     <div class="classroom-section">
                         <p class="classroom-section-title">{{ __('ui.classroom.about_course') }}</p>
-                        @if ($course->description)
-                            <p class="classroom-section-text">{{ $course->description }}</p>
+                        @if ($localizedDescription)
+                            <p class="classroom-section-text">{{ $localizedDescription }}</p>
                         @else
                             <p class="classroom-section-text">{{ __('ui.classroom.about_default') }}</p>
                         @endif
                     </div>
 
-                    @if ($course->content)
+                    @if ($localizedContent)
                         <div class="classroom-section">
                             <p class="classroom-section-title">{{ __('ui.classroom.content') }}</p>
                             <div class="classroom-section-text">
-                                {!! nl2br(e($course->content)) !!}
+                                {!! nl2br(e($localizedContent)) !!}
                             </div>
                         </div>
                     @endif

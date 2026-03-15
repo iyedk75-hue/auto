@@ -10,7 +10,7 @@ A student must be able to log in, open a course, and read the PDF or watch the l
 
 ## Current State
 
-The repository already contains a Laravel 12 application with authentication, candidate and admin dashboards, course CRUD, candidate course listing/detail pages, inline PDF/video support in rough form, and single-device binding for candidate logins. S01 is now complete: French/Arabic locale switching, RTL shell behavior, translated shared navigation, translated auth entry screens, and localized public/admin/candidate dashboard and classroom shell surfaces are in place. The public landing page still contains the anti-piracy marketing block the user wants removed, bilingual course data fields are not added yet, and protected lesson assets are still uploaded to public storage.
+The repository already contains a Laravel 12 application with authentication, candidate and admin dashboards, course CRUD, candidate course listing/detail pages, inline PDF/video support in rough form, and single-device binding for candidate logins. S01 and S02 are now complete: French/Arabic locale switching, RTL shell behavior, translated shared navigation, translated auth entry screens, localized public/admin/candidate dashboard and classroom shell surfaces, bilingual course text storage, bilingual admin course authoring, and candidate-side Arabic content rendering with an explicit unavailable state are in place. The public landing page still contains the anti-piracy marketing block the user wants removed, and protected lesson assets are still uploaded to public storage.
 
 ## Architecture / Key Patterns
 

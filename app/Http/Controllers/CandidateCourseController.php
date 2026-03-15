@@ -15,12 +15,15 @@ class CandidateCourseController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
+        $locale = app()->getLocale();
+
         return view('candidate.courses.index', [
             'courses' => Course::query()
                 ->where('is_active', true)
                 ->orderBy('sort_order')
                 ->paginate(12),
             'categoryLabels' => Course::categoryLabels(),
+            'locale' => $locale,
         ]);
     }
 
@@ -34,9 +37,29 @@ class CandidateCourseController extends Controller
             abort(404);
         }
 
+        $locale = app()->getLocale();
+        $isArabicView = $locale === 'ar';
+        $showArabicUnavailable = $isArabicView && ! $course->hasArabicTranslation();
+
+        $localizedTitle = $isArabicView
+            ? ($course->titleForLocale('ar') ?: $course->title)
+            : $course->titleForLocale('fr');
+
+        $localizedDescription = $showArabicUnavailable
+            ? null
+            : ($isArabicView ? ($course->descriptionForLocale('ar') ?: $course->description) : $course->descriptionForLocale('fr'));
+
+        $localizedContent = $showArabicUnavailable
+            ? null
+            : ($isArabicView ? ($course->contentForLocale('ar') ?: $course->content) : $course->contentForLocale('fr'));
+
         return view('candidate.courses.show', [
             'course' => $course,
             'categoryLabels' => Course::categoryLabels(),
+            'localizedTitle' => $localizedTitle,
+            'localizedDescription' => $localizedDescription,
+            'localizedContent' => $localizedContent,
+            'showArabicUnavailable' => $showArabicUnavailable,
         ]);
     }
 

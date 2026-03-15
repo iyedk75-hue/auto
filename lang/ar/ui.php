@@ -231,6 +231,8 @@ return [
         'active' => 'نشط',
         'free' => 'حر',
         'none' => '-',
+        'arabic_unavailable_title' => 'العربية غير متاحة بعد',
+        'arabic_unavailable_body' => 'هذا الدرس لا يحتوي بعد على محتوى عربي. يمكنك العودة لاحقًا أو المتابعة بالفرنسية.',
         'categories' => [
             'priority_rules' => 'قواعد الأولوية',
             'traffic_signs' => 'إشارات المرور',

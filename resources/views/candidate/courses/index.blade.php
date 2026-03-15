@@ -15,15 +15,19 @@
                         @php
                             $categoryLabel = $categoryLabels[$course->category] ?? ucfirst(str_replace('_', ' ', $course->category));
                             $bannerClass = $course->category === 'traffic_signs' ? 'classroom-card-banner-alt' : '';
+                            $localizedTitle = $locale === 'ar' ? ($course->titleForLocale('ar') ?: $course->title) : $course->titleForLocale('fr');
+                            $localizedDescription = $locale === 'ar'
+                                ? ($course->descriptionForLocale('ar') ?: $course->description)
+                                : $course->descriptionForLocale('fr');
                         @endphp
                         <article class="classroom-card">
                             <div class="classroom-card-banner {{ $bannerClass }}" @if ($course->cover_path) style="background-image: linear-gradient(135deg, rgba(30, 58, 138, 0.4), rgba(15, 23, 42, 0.5)), url('{{ Storage::url($course->cover_path) }}'); background-size: cover; background-position: center;" @endif>
                                 <p class="classroom-card-meta">{{ $categoryLabel }}</p>
-                                <h3 class="classroom-card-title">{{ $course->title }}</h3>
+                                <h3 class="classroom-card-title">{{ $localizedTitle }}</h3>
                             </div>
                             <div class="classroom-card-body">
-                                @if ($course->description)
-                                    <p>{{ $course->description }}</p>
+                                @if ($localizedDescription)
+                                    <p>{{ $localizedDescription }}</p>
                                 @else
                                     <p>{{ __('ui.classroom.default_description') }}</p>
                                 @endif
