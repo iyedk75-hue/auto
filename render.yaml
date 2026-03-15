@@ -5,7 +5,7 @@ services:
     dockerfilePath: ./Dockerfile
     envVars:
       - key: APP_NAME
-        value: "Codex Learning Platform"
+        value: "Masar"
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
@@ -36,6 +36,5 @@ databases:
     plan: free
     databaseName: codex_learning
     user: codex_user
-
 
 

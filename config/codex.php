@@ -2,7 +2,7 @@
 
 return [
     'bank' => [
-        'account_holder' => env('CODEX_BANK_ACCOUNT_HOLDER', 'Codex Learning Platform'),
+        'account_holder' => env('CODEX_BANK_ACCOUNT_HOLDER', 'Masar'),
         'bank_name' => env('CODEX_BANK_NAME', 'Codex Bank'),
         'iban' => env('CODEX_BANK_IBAN', 'TN59040012345678901234'),
     ],

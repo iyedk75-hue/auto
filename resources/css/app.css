@@ -11,6 +11,11 @@
         --accent: #2563eb;
         --accent-soft: #dbeafe;
         --accent-strong: #1d4ed8;
+        --massar-primary: #ec5b13;
+        --massar-blue: #1e3a8a;
+        --massar-gold: #d4af37;
+        --massar-ivory: #f8f6f6;
+        --massar-dark: #221610;
     }
 
     body {
@@ -42,7 +47,7 @@
             linear-gradient(145deg, #111827 0%, #7c2d12 100%);
     }
 
-    body.theme-student-auth {
+    body.theme-candidate-auth {
         background:
             radial-gradient(circle at top left, rgba(56, 189, 248, 0.34), transparent 30%),
             linear-gradient(145deg, #0f172a 0%, #1d4ed8 100%);
@@ -58,6 +63,14 @@
         @apply min-h-screen;
     }
 
+    .page-shell-sidebar {
+        @apply md:flex;
+    }
+
+    .page-content {
+        @apply min-w-0 flex-1;
+    }
+
     .page-header {
         @apply border-b border-white/70 bg-white/65 backdrop-blur-xl;
         box-shadow: 0 24px 60px rgba(15, 23, 42, 0.05);
@@ -66,6 +79,57 @@
     .nav-shell {
         @apply sticky top-0 z-40 border-b border-white/70 bg-white/80 backdrop-blur-xl;
         box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+    }
+
+    .sidebar-shell {
+        @apply hidden md:flex md:flex-col md:items-center md:gap-6 md:py-6 md:px-3;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        width: 88px;
+        background: linear-gradient(180deg, #2563eb 0%, #1e3a8a 100%);
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.2);
+    }
+
+    .sidebar-brand {
+        @apply inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 text-white shadow-lg shadow-blue-900/30 ring-1 ring-white/25;
+    }
+
+    .sidebar-logo {
+        @apply h-6 w-6 fill-current text-white;
+    }
+
+    .sidebar-links {
+        @apply flex flex-1 flex-col items-center gap-4;
+    }
+
+    .sidebar-link {
+        @apply inline-flex h-12 w-12 items-center justify-center rounded-2xl text-white/80 transition;
+    }
+
+    .sidebar-link:hover {
+        background: rgba(255, 255, 255, 0.16);
+        color: #ffffff;
+        transform: translateY(-1px);
+    }
+
+    .sidebar-link-active {
+        background: #ffffff;
+        color: #1e3a8a;
+        box-shadow: 0 14px 30px rgba(15, 23, 42, 0.2);
+    }
+
+    .sidebar-footer {
+        @apply flex flex-col items-center gap-3 pb-2;
+    }
+
+    .sidebar-avatar {
+        @apply inline-flex h-10 w-10 items-center justify-center rounded-2xl text-sm font-bold text-white;
+        background: rgba(255, 255, 255, 0.18);
+    }
+
+    .sidebar-icon {
+        @apply h-5 w-5;
     }
 
     .nav-brand {
@@ -221,7 +285,7 @@
     }
 
     .guest-form-panel {
-        @apply bg-white p-8 sm:p-10;
+        @apply border border-white/40 bg-white/70 p-8 backdrop-blur-2xl sm:p-10;
         border-radius: 2rem;
         box-shadow: 0 40px 100px rgba(15, 23, 42, 0.22);
     }
@@ -241,6 +305,364 @@
     }
 
     .form-input-auth {
-        @apply block w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-sky-400 focus:ring-sky-400;
+        @apply block h-14 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900 shadow-sm focus:border-sky-400 focus:ring-sky-400;
+    }
+
+    .candidate-card {
+        @apply overflow-hidden rounded-2xl border border-slate-200/70 bg-white/90 shadow-lg transition-all duration-300;
+    }
+
+    .candidate-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16);
+    }
+
+    .candidate-card-media {
+        @apply h-48 w-full overflow-hidden rounded-t-xl;
+    }
+
+    .candidate-card-photo {
+        @apply flex h-full w-full items-center justify-center text-4xl font-extrabold text-white;
+        background: linear-gradient(135deg, rgba(30, 58, 138, 0.9), rgba(236, 91, 19, 0.8));
+    }
+
+    .agenda-list {
+        @apply flex flex-col gap-4;
+    }
+
+    .agenda-item {
+        @apply grid gap-4 rounded-[2rem] border border-white/80 bg-white/85 p-5 backdrop-blur;
+        grid-template-columns: 86px 1fr;
+        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+    }
+
+    .agenda-date {
+        @apply flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-900;
+        padding: 0.75rem;
+    }
+
+    .agenda-day {
+        @apply text-3xl font-extrabold leading-none;
+    }
+
+    .agenda-month {
+        @apply mt-1 text-xs font-semibold uppercase tracking-[0.24em] text-slate-500;
+    }
+
+    .agenda-year {
+        @apply mt-2 text-xs text-slate-400;
+    }
+
+    .agenda-card {
+        @apply flex flex-col gap-4;
+    }
+
+    .agenda-header {
+        @apply flex flex-wrap items-start justify-between gap-3;
+    }
+
+    .agenda-meta {
+        @apply text-sm text-slate-600;
+    }
+
+    .agenda-actions {
+        @apply flex flex-wrap gap-2;
+    }
+
+    @media (max-width: 640px) {
+        .agenda-item {
+            grid-template-columns: 1fr;
+        }
+
+        .agenda-date {
+            flex-direction: row;
+            gap: 0.75rem;
+            justify-content: flex-start;
+        }
+
+        .agenda-month {
+            margin-top: 0;
+        }
+
+        .agenda-year {
+            margin-top: 0;
+        }
+    }
+
+    .agenda-shell {
+        @apply grid gap-6;
+        grid-template-columns: 320px minmax(0, 1fr) 360px;
+    }
+
+    .agenda-panel {
+        @apply rounded-[2rem] border border-slate-200/70 bg-white/90 p-5 shadow-lg;
+    }
+
+    .agenda-panel-form {
+        @apply sticky top-24 self-start;
+        height: fit-content;
+    }
+
+    .agenda-panel-header {
+        @apply mb-5 flex items-start justify-between gap-4;
+    }
+
+    .agenda-panel-actions {
+        @apply flex items-center gap-2;
+    }
+
+    .agenda-icon-btn {
+        @apply inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50;
+    }
+
+    .agenda-icon-btn-sm {
+        @apply h-8 w-8 rounded-xl text-[0.65rem];
+    }
+
+    .agenda-icon-btn-sm svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .calendar-card {
+        @apply rounded-3xl border border-slate-200 bg-white p-4 shadow-sm;
+    }
+
+    .calendar-weekdays {
+        @apply grid grid-cols-7 gap-2 text-[11px] font-semibold uppercase text-slate-400;
+    }
+
+    .calendar-grid {
+        @apply mt-3 grid grid-cols-7 gap-2;
+    }
+
+    .calendar-cell {
+        @apply relative flex h-10 items-center justify-center rounded-2xl text-sm font-semibold text-slate-700;
+    }
+
+    .calendar-cell-active {
+        @apply ring-2 ring-blue-600;
+    }
+
+    .calendar-cell-today {
+        @apply bg-blue-600 text-white shadow-lg shadow-blue-500/30;
+    }
+
+    .calendar-cell-empty {
+        @apply text-transparent;
+    }
+
+    .calendar-dot {
+        @apply absolute -bottom-1 h-2 w-2 rounded-full bg-orange-400;
+    }
+
+    .agenda-upcoming {
+        @apply mt-6 rounded-3xl border border-slate-200/70 bg-white p-4;
+    }
+
+    .upcoming-card {
+        @apply flex items-center gap-3 rounded-2xl border border-slate-200/70 bg-white px-3 py-3 shadow-sm;
+    }
+
+    .upcoming-date {
+        @apply flex h-12 w-12 flex-col items-center justify-center rounded-2xl bg-slate-100;
+    }
+
+    .agenda-timeline {
+        @apply rounded-[2rem] border border-slate-200/70 bg-white/90 p-6 shadow-lg;
+    }
+
+    .agenda-timeline-header {
+        @apply flex items-center justify-between gap-4;
+    }
+
+    .agenda-day-pill {
+        @apply flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-lg font-extrabold text-white shadow-lg shadow-blue-500/30;
+    }
+
+    .agenda-timeline-body {
+        @apply mt-6 grid gap-4;
+    }
+
+    .timeline-item {
+        @apply grid gap-4;
+        grid-template-columns: 96px 1fr;
+    }
+
+    .timeline-time {
+        @apply text-sm font-semibold text-slate-400;
+    }
+
+    .timeline-card {
+        @apply rounded-3xl border border-slate-200/70 bg-white p-4 shadow-sm;
+    }
+
+    .timeline-empty {
+        @apply rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-500;
+    }
+
+    .agenda-form {
+        @apply space-y-6;
+    }
+
+    @media (max-width: 1280px) {
+        .agenda-shell {
+            grid-template-columns: 1fr;
+        }
+
+        .agenda-panel-form {
+            position: static;
+        }
+
+        .timeline-item {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .massar-landing {
+        background:
+            radial-gradient(circle at 10% 10%, rgba(30, 58, 138, 0.16), transparent 35%),
+            radial-gradient(circle at 80% 15%, rgba(236, 91, 19, 0.18), transparent 40%),
+            radial-gradient(circle at 20% 75%, rgba(212, 175, 55, 0.14), transparent 35%),
+            linear-gradient(180deg, #fff7ef 0%, var(--massar-ivory) 55%, #ffffff 100%);
+        color: #1f1b16;
+    }
+
+    .massar-body {
+        font-family: "Lexend", "Figtree", "Segoe UI", sans-serif;
+    }
+
+    .massar-title {
+        font-family: "Noto Kufi Arabic", "Lexend", "Segoe UI", sans-serif;
+    }
+
+    .massar-kicker {
+        @apply text-xs font-bold uppercase;
+        letter-spacing: 0.38em;
+        color: rgba(34, 22, 16, 0.6);
+    }
+
+    .massar-chip {
+        @apply inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold;
+        background: rgba(236, 91, 19, 0.12);
+        color: #7a2f0b;
+        border: 1px solid rgba(236, 91, 19, 0.28);
+    }
+
+    .massar-card {
+        @apply border bg-white/80 p-6;
+        border-radius: 1.75rem;
+        border-color: rgba(148, 163, 184, 0.25);
+        box-shadow: 0 30px 70px rgba(34, 22, 16, 0.08);
+        backdrop-filter: blur(12px);
+    }
+
+    .massar-card-ink {
+        background: linear-gradient(140deg, rgba(30, 58, 138, 0.96), rgba(15, 23, 42, 0.96));
+        color: #f8fafc;
+    }
+
+    .massar-hero-card {
+        @apply relative;
+    }
+
+    .massar-hero-badge {
+        @apply absolute right-6 top-6 rounded-2xl bg-white px-4 py-2 text-sm font-bold text-[#1e3a8a] shadow-xl;
+        z-index: 10;
+    }
+
+    .massar-btn-primary {
+        @apply inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold text-white transition;
+        background: linear-gradient(135deg, var(--massar-primary) 0%, #ff7a2f 100%);
+        box-shadow: 0 18px 40px rgba(236, 91, 19, 0.28);
+    }
+
+    .massar-btn-ghost {
+        @apply inline-flex items-center justify-center rounded-full border px-6 py-3 text-sm font-semibold transition;
+        border-color: rgba(30, 58, 138, 0.25);
+        color: #1e3a8a;
+        background: rgba(255, 255, 255, 0.7);
+    }
+
+    .classroom-shell {
+        @apply space-y-8;
+    }
+
+    .classroom-header {
+        @apply rounded-[2rem] border border-slate-200/70 bg-white/90 p-6 shadow-lg;
+    }
+
+    .classroom-title {
+        @apply text-3xl font-extrabold tracking-tight text-slate-950;
+    }
+
+    .classroom-subtitle {
+        @apply text-sm font-semibold text-slate-500;
+    }
+
+    .classroom-grid {
+        @apply grid gap-6 md:grid-cols-2 xl:grid-cols-3;
+    }
+
+    .classroom-card {
+        @apply overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white shadow-lg transition-all duration-300;
+    }
+
+    .classroom-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16);
+    }
+
+    .classroom-card-banner {
+        @apply relative h-32 p-6 text-white;
+        background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+    }
+
+    .classroom-card-banner-alt {
+        background: linear-gradient(135deg, #ec5b13 0%, #f59e0b 100%);
+    }
+
+    .classroom-card-title {
+        @apply text-xl font-bold;
+    }
+
+    .classroom-card-meta {
+        @apply mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/70;
+    }
+
+    .classroom-card-body {
+        @apply space-y-4 p-6 text-sm text-slate-600;
+    }
+
+    .classroom-card-footer {
+        @apply flex items-center justify-between border-t border-slate-100 px-6 py-4;
+    }
+
+    .classroom-hero {
+        @apply relative overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white shadow-lg;
+    }
+
+    .classroom-hero-banner {
+        @apply h-44 bg-gradient-to-br from-blue-900 via-blue-700 to-sky-500;
+    }
+
+    .classroom-hero-content {
+        @apply -mt-16 space-y-3 px-6 pb-6;
+    }
+
+    .classroom-pill {
+        @apply inline-flex items-center rounded-full bg-white/90 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 shadow;
+    }
+
+    .classroom-section {
+        @apply rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-sm;
+    }
+
+    .classroom-section-title {
+        @apply text-lg font-bold text-slate-900;
+    }
+
+    .classroom-section-text {
+        @apply mt-3 text-sm leading-7 text-slate-600;
     }
 }

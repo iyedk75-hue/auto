@@ -9,45 +9,48 @@
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
+        <link href="https://fonts.bunny.net/css?family=lexend:400,500,600,700,800|noto-kufi-arabic:400,500,600,700,800&display=swap" rel="stylesheet" />
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     @php
         $themeClass = auth()->check()
-            ? (auth()->user()->isAdmin() ? 'theme-admin' : 'theme-student')
+            ? (auth()->user()->isAdmin() ? 'theme-admin' : 'theme-candidate')
             : 'theme-guest';
     @endphp
     <body class="app-body {{ $themeClass }}">
-        <div class="page-shell">
+        <div class="page-shell {{ auth()->check() ? 'page-shell-sidebar' : '' }}">
             @include('layouts.navigation')
 
-            @isset($header)
-                <header class="page-header">
-                    <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-                        {{ $header }}
+            <div class="page-content">
+                @isset($header)
+                    <header class="page-header">
+                        <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+                            {{ $header }}
+                        </div>
+                    </header>
+                @endisset
+
+                @if (session('status') || session('error'))
+                    <div class="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+                        @if (session('status'))
+                            <div class="flash-banner flash-banner-success">
+                                {{ session('status') }}
+                            </div>
+                        @endif
+
+                        @if (session('error'))
+                            <div class="flash-banner flash-banner-danger">
+                                {{ session('error') }}
+                            </div>
+                        @endif
                     </div>
-                </header>
-            @endisset
+                @endif
 
-            @if (session('status') || session('error'))
-                <div class="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
-                    @if (session('status'))
-                        <div class="flash-banner flash-banner-success">
-                            {{ session('status') }}
-                        </div>
-                    @endif
-
-                    @if (session('error'))
-                        <div class="flash-banner flash-banner-danger">
-                            {{ session('error') }}
-                        </div>
-                    @endif
-                </div>
-            @endif
-
-            <main>
-                {{ $slot }}
-            </main>
+                <main>
+                    {{ $slot }}
+                </main>
+            </div>
         </div>
     </body>
 </html>

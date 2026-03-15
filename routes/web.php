@@ -2,30 +2,33 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminCourseController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\CourseController;
-use App\Http\Controllers\DocumentController;
-use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\AdminExamController;
+use App\Http\Controllers\AdminPaymentController;
+use App\Http\Controllers\AdminQuestionController;
+use App\Http\Controllers\CandidateController;
+use App\Http\Controllers\CandidateCourseController;
+use App\Http\Controllers\CandidatePaymentController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\StudentDocumentController;
+use App\Http\Controllers\QuizController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [CourseController::class, 'index'])->name('home');
-Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
-Route::get('/course/{course}', [CourseController::class, 'show'])->name('courses.show');
+Route::view('/', 'marketing.massar')->name('home');
+Route::view('/massar', 'marketing.massar')->name('marketing.massar');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/dashboard', [CourseController::class, 'dashboard'])->name('dashboard');
-    Route::post('/panier/{course}', [CartController::class, 'store'])->name('cart.store');
-    Route::delete('/panier/{cartItem}', [CartController::class, 'destroy'])->name('cart.destroy');
-    Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
-    Route::post('/payment', [PaymentController::class, 'store'])->name('payments.store');
-    Route::get('/payments/{payment}/proof', [PaymentController::class, 'showProof'])->name('payments.proof');
-    Route::get('/my-courses', [CourseController::class, 'myCourses'])->name('courses.my');
-    Route::get('/my-courses/{course}', [CourseController::class, 'watch'])->name('courses.watch');
-    Route::get('/my-courses/{course}/download', [CourseController::class, 'download'])->name('courses.download');
-    Route::get('/courses/{course}/documents/{document}/download', [StudentDocumentController::class, 'download'])
-        ->name('courses.documents.download');
+    Route::get('/dashboard', [CandidateController::class, 'dashboard'])->name('dashboard');
+    Route::get('/quiz', [QuizController::class, 'show'])->name('quiz.show');
+    Route::post('/quiz', [QuizController::class, 'submit'])->name('quiz.submit');
+    Route::get('/courses', [CandidateCourseController::class, 'index'])->name('courses.index');
+    Route::get('/courses/{course}', [CandidateCourseController::class, 'show'])
+        ->name('courses.show')
+        ->missing(function () {
+            return redirect()
+                ->route('courses.index')
+                ->with('error', 'Cours introuvable. Veuillez sélectionner un cours depuis la liste.');
+        });
+    Route::get('/courses/{course}/pdf', [CandidateCourseController::class, 'pdf'])->name('courses.pdf');
+    Route::get('/payments', [CandidatePaymentController::class, 'index'])->name('payments.index');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -36,12 +39,11 @@ Route::middleware(['auth', 'verified', 'admin'])
     ->name('admin.')
     ->group(function (): void {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+        Route::get('/candidates', [AdminController::class, 'candidates'])->name('candidates.index');
         Route::resource('/courses', AdminCourseController::class)->except('show');
-        Route::post('/courses/{course}/documents', [DocumentController::class, 'store'])->name('courses.documents.store');
-        Route::get('/payments', [AdminController::class, 'payments'])->name('payments.index');
-        Route::patch('/payments/{payment}', [AdminController::class, 'updatePaymentStatus'])->name('payments.update');
-        Route::get('/payments/{payment}/proof', [AdminController::class, 'showPaymentProof'])->name('payments.proof');
-        Route::get('/students', [AdminController::class, 'students'])->name('students.index');
+        Route::resource('/payments', AdminPaymentController::class)->except('show');
+        Route::resource('/exams', AdminExamController::class)->except('show');
+        Route::resource('/questions', AdminQuestionController::class)->except('show');
     });
 
 require __DIR__.'/auth.php';

@@ -1,315 +1,351 @@
-# Codex Learning Platform
+# Tunisie Auto-École (Masar) — Platform README
 
-A Laravel-based e-learning platform where students purchase and access online courses via manual bank transfer (RIB) payment, validated by an administrator.
+Smart Driving Theory Learning System for Tunisia 🇹🇳
 
----
+Tunisie Auto-École (Masar) is a digital platform designed to modernize driving theory education in Tunisia. The system connects driving school owners (Admin) and driving theory candidates (Students) while delivering a structured learning path, a realistic exam simulator, and strong anti-piracy protection.
 
-## Table of Contents
+Goal: Become the national standard platform for learning driving theory in Tunisia.
 
-- [Overview](#overview)
-- [Tech Stack](#tech-stack)
-- [Architecture](#architecture)
-- [Database Schema](#database-schema)
-- [Roles & Permissions](#roles--permissions)
-- [Payment Workflow](#payment-workflow)
-- [Routes](#routes)
-- [Security](#security)
-- [Build Plan](#build-plan)
-- [Getting Started](#getting-started)
+## 1. Design System
 
----
+Color palette
 
-## Overview
+| Element | Hex | Tailwind Class | Usage |
+| --- | --- | --- | --- |
+| Primary Orange | `#ec5b13` | `bg-primary` | Buttons, active links |
+| Royal Blue | `#1e3a8a` | `bg-royal-blue` | Hero sections, sidebar |
+| Luxury Gold | `#d4af37` | `text-gold-accent` | Icons, highlights |
+| Off-White | `#f8f6f6` | `bg-background-light` | Main background |
+| Dark Chocolate | `#221610` | `bg-background-dark` | Footer / dark mode |
 
-Codex Learning Platform connects students with online courses. Unlike platforms with automated payment gateways, Codex uses a **manual bank transfer (RIB)** model:
+## 2. Typography
 
-1. Student selects a course and receives bank transfer details (IBAN, account holder, amount, reference).
-2. Student transfers the funds and uploads proof of payment.
-3. Admin verifies the transfer and approves/rejects the payment.
-4. Upon approval, the student is enrolled and gains access to the course content.
+| Type | Font |
+| --- | --- |
+| Arabic text | Noto Kufi Arabic |
+| Numbers / Stats | Lexend |
 
----
+Example Tailwind usage
 
-## Tech Stack
+`font-['Noto_Kufi_Arabic']`
 
-| Layer     | Technology              |
-|-----------|-------------------------|
-| Backend   | Laravel (PHP)           |
-| Frontend  | Blade / HTML / CSS / JS |
-| Database  | PostgreSQL              |
-| Auth      | Laravel built-in auth   |
+`font-['Lexend']`
 
----
+## 3. Global UI Effects
 
-## Architecture
+Cards
 
-```
-app/
-├── Models/
-│   ├── User.php
-│   ├── Course.php
-│   ├── Payment.php
-│   └── Enrollment.php
-├── Http/
-│   ├── Controllers/
-│   │   ├── CourseController.php
-│   │   ├── PaymentController.php
-│   │   └── AdminController.php
-│   └── Middleware/
-│       └── AdminMiddleware.php
-resources/
-└── views/
-    ├── courses/
-    ├── payments/
-    └── admin/
-```
+- `shadow-md`
+- `hover:shadow-2xl`
+- `transition-all`
+- `duration-300`
+- `hover:-translate-y-2`
 
----
+Gradient background
 
-## Database Schema
+- `bg-gradient-to-br`
+- `from-royal-blue`
+- `to-background-dark`
 
-### users
-| Column     | Type      | Notes               |
-|------------|-----------|----------------------|
-| id         | PK        |                      |
-| name       | string    |                      |
-| email      | string    | unique               |
-| password   | string    | hashed               |
-| role       | string    | `admin` or `student` |
-| created_at | timestamp |                      |
+## 4. Platform Structure
 
-### courses
-| Column      | Type      | Notes |
-|-------------|-----------|-------|
-| id          | PK        |       |
-| title       | string    |       |
-| description | text      |       |
-| price       | decimal   |       |
-| video_url   | string    |       |
-| created_at  | timestamp |       |
+The platform contains three main application areas:
 
-### payments
-| Column     | Type      | Notes                              |
-|------------|-----------|------------------------------------|
-| id         | PK        |                                    |
-| user_id    | FK→users  |                                    |
-| course_id  | FK→courses|                                    |
-| amount     | decimal   |                                    |
-| reference  | string    | unique transfer reference           |
-| proof      | string    | file path to uploaded proof image   |
-| status     | string    | `pending`, `approved`, `rejected`  |
-| created_at | timestamp |                                    |
+- Landing Page
+- Admin Dashboard
+- Candidate Dashboard
 
-### enrollments
-| Column         | Type      | Notes        |
-|----------------|-----------|--------------|
-| id             | PK        |              |
-| user_id        | FK→users  |              |
-| course_id      | FK→courses|              |
-| access_granted | boolean   | default false|
-| created_at     | timestamp |              |
+## 5. Landing Page
 
----
+Route
 
-## Roles & Permissions
+`/`
 
-### Admin
-- Create / update / delete courses
-- View all students
-- View payment requests
-- Approve or reject payments
-- Grant course access
+Layout
 
-### Student
-- Register and login
-- Browse courses
-- Request course purchase
-- Upload payment proof (bank transfer receipt)
-- Access purchased courses after admin approval
+Full-screen hero section.
 
----
+Headline
 
-## Payment Workflow
+Text size: `text-5xl` → `text-7xl`
 
-```
-┌─────────┐   select course   ┌─────────────────┐
-│ Student │ ───────────────►  │ View bank info   │
-└─────────┘                   │ (IBAN, amount,   │
-                              │  reference)      │
-                              └────────┬─────────┘
-                                       │ transfer funds
-                                       ▼
-                              ┌─────────────────┐
-                              │ Upload proof     │
-                              └────────┬─────────┘
-                                       │ status = pending
-                                       ▼
-                              ┌─────────────────┐
-                              │ Admin reviews    │
-                              └───┬─────────┬────┘
-                          approve │         │ reject
-                                  ▼         ▼
-                          ┌──────────┐  ┌──────────┐
-                          │ Enrolled │  │ Rejected │
-                          │ + access │  │ notified │
-                          └──────────┘  └──────────┘
-```
+Main title: Pass the driving theory exam on the first attempt.
 
----
+Subtitle (text-xl)
 
-## Routes
+Masar provides the most advanced simulation for the Tunisian driving theory exam (A / B / C) with real-time follow-up from your driving school.
 
-### Student Routes
-| Method | URI               | Action                        |
-|--------|-------------------|-------------------------------|
-| GET    | `/courses`        | List all courses              |
-| GET    | `/course/{id}`    | View course details           |
-| POST   | `/payment`        | Submit payment proof          |
-| GET    | `/my-courses`     | View enrolled courses         |
+CTA buttons
 
-### Admin Routes (protected by admin middleware)
-| Method | URI                | Action                       |
-|--------|--------------------|------------------------------|
-| GET    | `/admin/dashboard` | Admin dashboard overview     |
-| GET    | `/admin/courses`   | Manage courses (CRUD)        |
-| GET    | `/admin/payments`  | Review pending payments      |
-| GET    | `/admin/students`  | View registered students     |
+Size: `px-8 py-4 text-lg`
 
----
+Primary CTA (Orange): Register via WhatsApp
 
-## Security
+Secondary CTA (Blue outline): Driving School Login
 
-### Authentication & Authorization
-- **Laravel built-in authentication** (registration, login, password hashing via bcrypt).
-- **Role-based access control**: `role` column on users table distinguishes `admin` from `student`.
-- **Admin middleware** (`AdminMiddleware`) protects all `/admin/*` routes — rejects non-admin users with 403.
+Stats bar
 
-### Input Validation & Injection Prevention
-- **CSRF protection**: All POST/PUT/DELETE forms include `@csrf` token. Laravel middleware rejects requests without valid tokens.
-- **Server-side validation**: Every form submission is validated in the controller using Laravel's `validate()` — required fields, types, max lengths, allowed values (`in:pending,approved,rejected`).
-- **Eloquent ORM & parameterized queries**: All database interaction uses Eloquent or query builder with bound parameters — no raw SQL concatenation. This prevents SQL injection.
-- **Blade auto-escaping**: All output uses `{{ }}` (auto-escaped). Raw `{!! !!}` is never used for user-supplied data. This prevents XSS.
+Displayed below hero. Example metrics:
 
-### File Upload Security
-- **Payment proof uploads** are validated for file type (image/pdf only), max size, and stored in a non-public directory or via Laravel's storage disk.
-- Files are served through a controller route that checks authorization — students can only view their own proofs, admins can view all.
-- Original filenames are never preserved; files are renamed to random hashes.
+- 50+ Partner Driving Schools
+- 98% Success Rate
+- 5000+ Candidates
 
-### Access Control
-- Students can only view their own payments and enrolled courses.
-- Course video URLs are only accessible to enrolled students (checked via `enrollments` table).
-- All admin actions verify the authenticated user's role before executing.
+Floating badge
 
-### Rate Limiting & Session Security
-- Laravel's built-in rate limiting on login routes prevents brute-force attacks.
-- Sessions use encrypted cookies with `HttpOnly` and `Secure` flags in production.
-- `.env` file is excluded from version control and contains all secrets.
+Floating card displaying: 98% Success Rate
 
----
+## 6. Login Page
 
-## Build Plan
+Route
 
-The project is built in **7 phases**, each delivering a working increment:
+`/login`
 
-### Phase 1 — Project Setup
-- `laravel new codex-learning`
-- Configure PostgreSQL in `.env`
-- Run initial migration
-- Set up Git repository
+Layout
 
-### Phase 2 — Authentication
-- `php artisan make:auth` or Laravel Breeze/Fortify
-- Add `role` column to users table (migration)
-- Seed an admin user
-- Create `AdminMiddleware` to gate `/admin/*` routes
+Centered glassmorphism card.
 
-### Phase 3 — Course Management (Admin)
-- `Course` model + migration
-- `CourseController` with CRUD actions
-- Admin Blade views: course list, create/edit form
-- Route registration under `/admin/courses`
+Role switcher
 
-### Phase 4 — Student Course Browsing
-- Public course listing page (`/courses`)
-- Course detail page (`/course/{id}`)
-- Blade views with course info and price
+User selects login type:
 
-### Phase 5 — Payment System
-- `Payment` model + migration
-- `PaymentController`: show bank info, handle proof upload, list student payments
-- Payment form with file upload (proof)
-- Display payment status to student
+- Candidate
+- Driving School
 
-### Phase 6 — Admin Payment Validation
-- Admin payments list (pending/approved/rejected filters)
-- Approve/reject actions in `AdminController`
-- On approval: create `Enrollment` record with `access_granted = true`
-- Notify student of status change (optional: email or dashboard flash)
+Input fields
 
-### Phase 7 — Enrollment & Course Access
-- `Enrollment` model + migration
-- `/my-courses` page listing enrolled courses
-- Video access gate: middleware or policy check on enrollment status
-- Admin can view all enrollments
+Height: `h-14`
 
-### Current Implementation Status
+Fields:
 
-- Phase 1: implemented
-- Phase 2: implemented
-- Phase 3: implemented
-- Phase 4: implemented
-- Phase 5: implemented
-- Phase 6: implemented
-- Phase 7: implemented
+- Phone Number
+- Password
 
----
+Candidate marketing message
 
-## Getting Started
+Don’t have an account? Activate your account instantly through WhatsApp.
 
-```bash
-# Clone the repository
-git clone <repo-url> codex-learning
-cd codex-learning
+Button: WhatsApp activation
 
-# Install dependencies
-composer install
-npm install && npm run build
+## 7. Admin Dashboard
 
-# Configure environment
-cp .env.example .env
-php artisan key:generate
+Route
 
-# Start PostgreSQL in Docker
-docker compose up -d postgres
+`/admin`
 
-# The app connects to the Docker database with:
-# DB_CONNECTION=pgsql
-# DB_HOST=127.0.0.1
-# DB_PORT=5432
-# DB_DATABASE=codex_learning
-# DB_USERNAME=postgres
-# DB_PASSWORD=postgres
-#
-# Optional bank transfer settings:
-# CODEX_BANK_ACCOUNT_HOLDER="Codex Learning Platform"
-# CODEX_BANK_NAME="Codex Bank"
-# CODEX_BANK_IBAN=TN59040012345678901234
-# CODEX_PAYMENT_REFERENCE_PREFIX=CDX
-# CODEX_PAYMENT_PROOF_MAX_KB=5120
+Layout
 
-# Run migrations and seed
-php artisan migrate
-php artisan db:seed
+Right sidebar layout.
 
-# Start the server
-php artisan serve
-```
+Structure
 
-Visit `http://localhost:8000` — register as a student or login as admin (seeded credentials in `DatabaseSeeder`).
+- Sidebar width: `w-64`
+- Main content: `flex-1`
 
-### Docker Database
+Sections
 
-- PostgreSQL runs in Docker via `docker-compose.yml`.
-- The main `.env` is configured for Dockerized PostgreSQL.
-- Tests use `.env.testing` with SQLite in memory, so `php artisan test` does not depend on Docker.
-- If you run the app with XAMPP PHP, make sure `pdo_pgsql` and `pgsql` are enabled in `C:\xampp\php\php.ini`.
+- Candidates
+- Accounting
+- Add Candidate
+
+## 8. Candidates Gallery
+
+The system emphasizes visual student profiles rather than simple tables.
+
+Layout
+
+Grid of candidate cards.
+
+Card specifications
+
+- `min-h-[350px]`
+- `rounded-2xl`
+- `shadow-lg`
+
+Candidate image
+
+- `h-48`
+- `w-full`
+- `object-cover`
+- `rounded-t-xl`
+
+Images must be visually dominant.
+
+Card information
+
+Each card displays:
+
+- Candidate name
+- Phone number
+- Registration date
+- Learning progress
+- Financial status
+
+Actions
+
+- Edit
+- View results
+- Send payment reminder
+
+## 9. Smart Accountant
+
+Financial overview page.
+
+Displays:
+
+- Monthly revenue
+- Outstanding payments
+- Platform balance
+
+Transactions table fields:
+
+- Candidate Name
+- Amount Paid
+- Date
+- Remaining Balance
+
+## 10. Add Candidate Page
+
+Form for creating a new candidate.
+
+Fields:
+
+- Name
+- Phone
+- Teacher Notes
+
+AI language assistant
+
+Next to the Name and Teacher Notes fields, an icon allows:
+
+- Arabic grammar correction
+- Text formatting assistance
+
+Platform fee notice
+
+Footer alert: Candidate registration fee: 15 TND
+
+## 11. Candidate Dashboard
+
+Route
+
+`/candidate`
+
+Focus: learning + exam success motivation.
+
+## 12. Login Challenge
+
+After login, a pop-up challenge appears.
+
+Title: Verify your knowledge before starting.
+
+Content: Random traffic sign question with 3 options.
+
+Example format:
+
+- A
+- B
+- C
+
+The student must answer before continuing.
+
+## 13. Classroom (Lesson System)
+
+Lessons are organized by categories:
+
+- Priority rules
+- Traffic signs
+- Driving safety
+- Vehicle basics
+
+Lesson layout
+
+Images:
+
+- `aspect-video`
+- full width
+
+Text explanation: `text-2xl`
+
+Displayed below each image.
+
+## 14. Anti-Piracy Watermark
+
+To prevent screenshot sharing, a moving watermark appears over lessons and exam screens.
+
+Content:
+
+- Candidate Name
+- Phone Number
+
+Opacity: `opacity-10`
+
+## 15. Exam Simulator
+
+Simulates the official Tunisian driving theory exam.
+
+Timer
+
+- `text-4xl`
+- `font-mono`
+- `text-primary`
+
+Answer buttons
+
+Large buttons optimized for mobile interaction.
+
+- `h-20`
+- full width
+
+## 16. Mobile-First Design
+
+The UI should feel like a native mobile app.
+
+Recommended layout principles:
+
+- Large tap areas
+- Minimal text density
+- Strong visual hierarchy
+- Optimized for smartphones
+
+## 17. Candidate Photo Format
+
+Portrait ratio for candidate photos:
+
+- `aspect-[3/4]`
+- `w-full`
+
+Used in the admin dashboard for professional profile cards.
+
+## 18. Core Platform Philosophy
+
+For candidates: We don’t sell accounts — we build confident drivers.
+
+For driving schools: Manage students, payments, and progress in one system and elevate your school’s professional image.
+
+## 19. Suggested Tech Stack
+
+Frontend
+
+- Blade (Laravel views)
+- TailwindCSS
+- Alpine.js
+- Vite
+
+Backend
+
+- Laravel
+
+Database
+
+- MySQL or PostgreSQL
+
+Authentication
+
+- Laravel auth + device session control
+
+Media storage
+
+- Cloud storage with CDN delivery
+
+If you want, I can also generate the next critical file for Codex developers, which is `exam_questions_schema.json`. It defines how A/B/C exam questions are stored in the database, including traffic sign images, correct answers, difficulty levels, and lesson categories. This schema is essential to build the exam simulator engine.

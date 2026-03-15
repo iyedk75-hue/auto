@@ -19,11 +19,11 @@ class AdminAccessTest extends TestCase
             ->assertOk();
     }
 
-    public function test_student_cannot_view_admin_dashboard(): void
+    public function test_candidate_cannot_view_admin_dashboard(): void
     {
-        $student = User::factory()->create();
+        $candidate = User::factory()->create();
 
-        $this->actingAs($student)
+        $this->actingAs($candidate)
             ->get(route('admin.dashboard'))
             ->assertForbidden();
     }

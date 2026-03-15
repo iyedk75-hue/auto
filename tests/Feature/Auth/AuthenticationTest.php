@@ -63,7 +63,7 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_student_accounts_cannot_use_the_admin_login_page(): void
+    public function test_candidate_accounts_cannot_use_the_admin_login_page(): void
     {
         $user = User::factory()->create();
 

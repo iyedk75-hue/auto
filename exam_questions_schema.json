@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Masar_Exam_Question",
+  "description": "Schema for Tunisian driving theory exam questions (A/B/C).",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for the question."
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "priority_rules",
+        "traffic_signs",
+        "driving_safety",
+        "vehicle_basics",
+        "stopping_parking",
+        "overtaking_crossing"
+      ],
+      "description": "Lesson category for filtering and progression."
+    },
+    "image_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Secure URL to the visual scenario or traffic sign image."
+    },
+    "question_text": {
+      "type": "string",
+      "description": "Question text in Arabic dialect or standard Arabic."
+    },
+    "options": {
+      "type": "array",
+      "description": "Answer choices. Always 3 options for the official exam format.",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "properties": {
+          "option_id": {
+            "type": "string",
+            "enum": ["A", "B", "C"],
+            "description": "Option letter."
+          },
+          "text": {
+            "type": "string",
+            "description": "Option label."
+          }
+        },
+        "required": ["option_id", "text"]
+      }
+    },
+    "correct_answer": {
+      "type": "string",
+      "enum": ["A", "B", "C"],
+      "description": "The correct answer option letter."
+    },
+    "explanation": {
+      "type": "string",
+      "description": "Pedagogical explanation shown after the candidate answers."
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": ["easy", "medium", "hard"],
+      "description": "Difficulty level used for smart reminders."
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Deactivate if the law changes without deleting history."
+    }
+  },
+  "required": [
+    "id",
+    "category",
+    "image_url",
+    "question_text",
+    "options",
+    "correct_answer",
+    "explanation"
+  ]
+}

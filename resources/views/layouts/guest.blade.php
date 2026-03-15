@@ -15,7 +15,7 @@
     @php
         $isAdminLogin = request()->routeIs('admin.login*');
     @endphp
-    <body class="app-body theme-guest {{ $isAdminLogin ? 'theme-admin-auth' : 'theme-student-auth' }}">
+    <body class="app-body theme-guest {{ $isAdminLogin ? 'theme-admin-auth' : 'theme-candidate-auth' }}">
         <div class="guest-shell">
             <div class="guest-brand-panel">
                 <a href="{{ route('home') }}" class="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-white/90 text-sky-700 shadow-lg shadow-sky-950/10">
@@ -24,16 +24,16 @@
 
                 <div class="space-y-5">
                     <span class="inline-flex rounded-full border border-white/40 bg-white/20 px-4 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-white">
-                        {{ $isAdminLogin ? 'Admin Access' : 'Student Access' }}
+                        {{ $isAdminLogin ? 'Espace Auto-école' : 'Espace Candidat' }}
                     </span>
                     <div class="space-y-3">
                         <h1 class="text-4xl font-extrabold leading-tight text-white sm:text-5xl">
-                            {{ $isAdminLogin ? 'Review payments and manage the academy.' : 'Build a learning flow that feels like a real platform.' }}
+                            {{ $isAdminLogin ? 'Pilotez votre auto-école en temps réel.' : 'Réussissez le code plus vite avec Massar.' }}
                         </h1>
                         <p class="max-w-xl text-base leading-7 text-white/78">
                             {{ $isAdminLogin
-                                ? 'Use the administrator entry point to review proofs, unlock courses, and keep catalog operations separated from student access.'
-                                : 'Browse courses, add them to your panier, upload one transfer proof per purchase, and continue from a dedicated learning space.' }}
+                                ? 'Suivez les candidats, planifiez les examens, gérez les paiements et gardez le contrôle sur tout le flux.'
+                                : 'Accédez aux cours, passez des quiz intelligents et préparez-vous efficacement à l’examen.' }}
                         </p>
                     </div>
                 </div>
@@ -41,11 +41,11 @@
                 <div class="grid gap-3 sm:grid-cols-2">
                     <div class="guest-stat">
                         <span class="guest-stat-label">Flow</span>
-                        <strong class="guest-stat-value">{{ $isAdminLogin ? 'CRUD + approvals' : 'Catalog -> panier -> unlock' }}</strong>
+                        <strong class="guest-stat-value">{{ $isAdminLogin ? 'CRM + finance + agenda' : 'Quiz -> progression -> examen' }}</strong>
                     </div>
                     <div class="guest-stat">
                         <span class="guest-stat-label">Security</span>
-                        <strong class="guest-stat-value">Private proof storage and role-based access</strong>
+                        <strong class="guest-stat-value">DRM, filigrane dynamique, appareil unique</strong>
                     </div>
                 </div>
             </div>

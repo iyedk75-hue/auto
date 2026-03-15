@@ -8,6 +8,8 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -19,7 +21,7 @@ class AuthenticatedSessionController extends Controller
     public function create(): View
     {
         return view('auth.login', [
-            'loginMode' => 'student',
+            'loginMode' => 'candidate',
         ]);
     }
 
@@ -41,13 +43,17 @@ class AuthenticatedSessionController extends Controller
             Auth::guard('web')->logout();
 
             throw ValidationException::withMessages([
-                'email' => 'Use the admin login page for administrator accounts.',
+                'email' => 'Utilisez la page auto-école pour les comptes administrateurs.',
             ]);
         }
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $cookie = $this->bindDeviceIfNeeded($request);
+
+        $response = redirect()->intended(route('dashboard', absolute: false));
+
+        return $cookie ? $response->withCookie($cookie) : $response;
     }
 
     public function storeAdmin(LoginRequest $request): RedirectResponse
@@ -58,11 +64,13 @@ class AuthenticatedSessionController extends Controller
             Auth::guard('web')->logout();
 
             throw ValidationException::withMessages([
-                'email' => 'This login is reserved for administrator accounts only.',
+                'email' => 'Cette connexion est réservée aux comptes auto-école.',
             ]);
         }
 
         $request->session()->regenerate();
+
+        $this->touchLoginMeta($request);
 
         return redirect()->intended(route('admin.dashboard', absolute: false));
     }
@@ -79,5 +87,49 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/');
+    }
+
+    private function bindDeviceIfNeeded(Request $request): ?\Symfony\Component\HttpFoundation\Cookie
+    {
+        $user = $request->user();
+
+        if (! $user || $user->isAdmin()) {
+            return null;
+        }
+
+        $cookieName = 'massar_device';
+        $deviceId = $request->cookie($cookieName) ?? (string) Str::uuid();
+
+        if ($user->device_uuid && $user->device_uuid !== $deviceId) {
+            Auth::guard('web')->logout();
+
+            throw ValidationException::withMessages([
+                'email' => 'Ce compte est déjà lié à un autre appareil.',
+            ]);
+        }
+
+        if (! $user->device_uuid) {
+            $user->device_uuid = $deviceId;
+            $user->device_bound_at = now();
+        }
+
+        $this->touchLoginMeta($request);
+
+        return Cookie::forever($cookieName, $deviceId);
+    }
+
+    private function touchLoginMeta(Request $request): void
+    {
+        $user = $request->user();
+
+        if (! $user) {
+            return;
+        }
+
+        $user->forceFill([
+            'last_login_at' => now(),
+            'last_login_ip' => $request->ip(),
+            'last_user_agent' => (string) $request->userAgent(),
+        ])->save();
     }
 }

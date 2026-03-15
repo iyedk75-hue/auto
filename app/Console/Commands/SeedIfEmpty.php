@@ -2,7 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Course;
+use App\Models\AutoSchool;
+use App\Models\Question;
 use App\Models\User;
 use Illuminate\Console\Command;
 
@@ -14,7 +15,7 @@ class SeedIfEmpty extends Command
 
     public function handle(): int
     {
-        if (User::query()->exists() || Course::query()->exists()) {
+        if (User::query()->exists() || AutoSchool::query()->exists() || Question::query()->exists()) {
             $this->info('Database already has records. Skipping seeding.');
             return self::SUCCESS;
         }

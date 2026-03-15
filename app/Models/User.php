@@ -4,7 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -15,7 +15,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     public const ROLE_ADMIN = 'admin';
-    public const ROLE_STUDENT = 'student';
+    public const ROLE_CANDIDATE = 'candidate';
 
     /**
      * The attributes that are mass assignable.
@@ -27,6 +27,16 @@ class User extends Authenticatable
         'email',
         'role',
         'password',
+        'auto_school_id',
+        'phone',
+        'status',
+        'balance_due',
+        'registered_at',
+        'device_uuid',
+        'device_bound_at',
+        'last_login_at',
+        'last_login_ip',
+        'last_user_agent',
     ];
 
     /**
@@ -49,6 +59,10 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'balance_due' => 'decimal:2',
+            'registered_at' => 'datetime',
+            'device_bound_at' => 'datetime',
+            'last_login_at' => 'datetime',
         ];
     }
 
@@ -57,25 +71,23 @@ class User extends Authenticatable
         return $this->role === self::ROLE_ADMIN;
     }
 
+    public function autoSchool(): BelongsTo
+    {
+        return $this->belongsTo(AutoSchool::class);
+    }
+
+    public function quizSessions(): HasMany
+    {
+        return $this->hasMany(QuizSession::class);
+    }
+
     public function payments(): HasMany
     {
-        return $this->hasMany(Payment::class);
+        return $this->hasMany(PaymentRecord::class);
     }
 
-    public function enrollments(): HasMany
+    public function exams(): HasMany
     {
-        return $this->hasMany(Enrollment::class);
-    }
-
-    public function courses(): BelongsToMany
-    {
-        return $this->belongsToMany(Course::class, 'enrollments')
-            ->withPivot('access_granted')
-            ->withTimestamps();
-    }
-
-    public function cartItems(): HasMany
-    {
-        return $this->hasMany(CartItem::class);
+        return $this->hasMany(ExamSchedule::class);
     }
 }
