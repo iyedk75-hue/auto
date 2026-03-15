@@ -24,6 +24,28 @@ class AuthenticationTest extends TestCase
         $response->assertStatus(200);
     }
 
+    public function test_candidate_login_screen_can_be_rendered_in_arabic(): void
+    {
+        $this->withSession(['locale' => 'ar'])
+            ->get('/login')
+            ->assertOk()
+            ->assertSee('lang="ar"', false)
+            ->assertSee('dir="rtl"', false)
+            ->assertSee('دخول المترشح')
+            ->assertSee('رقم الهاتف');
+    }
+
+    public function test_admin_login_screen_can_be_rendered_in_arabic(): void
+    {
+        $this->withSession(['locale' => 'ar'])
+            ->get('/admin/login')
+            ->assertOk()
+            ->assertSee('lang="ar"', false)
+            ->assertSee('dir="rtl"', false)
+            ->assertSee('دخول مدرسة السياقة')
+            ->assertSee('الدخول إلى لوحة التحكم');
+    }
+
     public function test_users_can_authenticate_using_the_login_screen(): void
     {
         $user = User::factory()->create();

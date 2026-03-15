@@ -44,7 +44,7 @@
   - Do: Add middleware-backed locale selection for the web stack, add a shared language-switch endpoint, constrain allowed locales to French/Arabic, and write feature tests that prove persistence and `lang`/`dir` behavior across guest and authenticated routes.
   - Verify: `php artisan test --filter=LocaleSwitchTest`
   - Done when: Locale changes survive redirects/navigation and tests prove French/Arabic shell state on public, candidate, and admin pages.
-- [ ] **T02: Translate shared layouts, navigation, and auth entry screens** `est:1h`
+- [x] **T02: Translate shared layouts, navigation, and auth entry screens** `est:1h`
   - Why: Shared shell text must be localized before page-level work can land cleanly in later slices.
   - Files: `resources/views/layouts/app.blade.php`, `resources/views/layouts/guest.blade.php`, `resources/views/layouts/navigation.blade.php`, `resources/views/auth/login.blade.php`, `lang/fr/*.php`, `lang/ar/*.php`
   - Do: Introduce translation resources, replace hard-coded shell/auth strings with translation keys, add a reusable language switcher in guest and authenticated navigation, and make the base layouts RTL-aware in Arabic mode.
