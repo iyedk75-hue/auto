@@ -30,6 +30,10 @@ class CourseResource extends Model
         self::TYPE_NOTE,
     ];
 
+    public const PROTECTED_VIDEO_DIRECTORY = 'courses/protected/resources/video';
+
+    public const PROTECTED_PDF_DIRECTORY = 'courses/protected/resources/pdf';
+
     protected $fillable = [
         'id',
         'course_id',
@@ -117,6 +121,15 @@ class CourseResource extends Model
         }
 
         return null;
+    }
+
+    public function deleteFileAsset(): void
+    {
+        $disk = $this->assetDisk();
+
+        if ($disk && $this->file_path) {
+            Storage::disk($disk)->delete($this->file_path);
+        }
     }
 
     /**

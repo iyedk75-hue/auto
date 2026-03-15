@@ -16,6 +16,7 @@ class AdminCourseController extends Controller
     {
         return view('admin.courses.index', [
             'courses' => Course::query()
+                ->withCount('resources')
                 ->orderBy('sort_order')
                 ->orderByDesc('created_at')
                 ->paginate(12),

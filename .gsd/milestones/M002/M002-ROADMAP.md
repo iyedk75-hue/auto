@@ -53,7 +53,7 @@ This milestone is complete only when all are true:
 - [x] **S01: Resource model and transition layer** `risk:high` `depends:[]`
   > After this: courses can represent many resources, and older single-resource courses still remain usable during the transition.
 
-- [ ] **S02: Admin multi-resource management** `risk:medium` `depends:[S01]`
+- [x] **S02: Admin multi-resource management** `risk:medium` `depends:[S01]`
   > After this: admin can add, edit, order, and remove many video, PDF, and note resources inside one course.
 
 - [ ] **S03: Student classroom-style resource list** `risk:medium` `depends:[S01,S02]`

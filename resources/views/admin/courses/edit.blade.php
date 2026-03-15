@@ -14,8 +14,9 @@
                     @method('PUT')
                     @include('admin.courses.partials.form', ['course' => $course, 'categories' => $categories])
 
-                    <div class="flex items-center gap-3">
+                    <div class="flex flex-wrap items-center gap-3">
                         <button type="submit" class="btn-admin-entry">{{ __('ui.admin_courses.update') }}</button>
+                        <a href="{{ route('admin.courses.resources.index', $course) }}" class="btn-primary">{{ __('ui.admin_courses.manage_resources') }}</a>
                         <a href="{{ route('admin.courses.index') }}" class="btn-ghost">{{ __('ui.admin_courses.cancel') }}</a>
                     </div>
                 </form>

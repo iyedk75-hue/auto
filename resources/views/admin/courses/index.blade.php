@@ -57,10 +57,26 @@
                                     @endif
                                 </span>
                             </div>
+                            <div class="flex items-center justify-between">
+                                <span>{{ __('ui.admin_courses.resource_count') }}</span>
+                                <span class="font-semibold text-slate-900">{{ trans_choice('ui.admin_courses.resource_items', $course->resources_count) }}</span>
+                            </div>
+                        </div>
+
+                        @php
+                            $hasLegacySupports = ! $course->resources_count && ($course->media_path || $course->pdf_path);
+                            $resourceStateLabel = $course->resources_count
+                                ? __('ui.admin_courses.resource_state_child')
+                                : ($hasLegacySupports ? __('ui.admin_courses.resource_state_legacy') : __('ui.admin_courses.resource_state_empty'));
+                        @endphp
+
+                        <div class="mt-4 inline-flex rounded-full bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-600">
+                            {{ $resourceStateLabel }}
                         </div>
 
                         <div class="mt-6 flex flex-wrap gap-3">
                             <a href="{{ route('admin.courses.edit', $course) }}" class="btn-neutral">{{ __('ui.admin_courses.edit') }}</a>
+                            <a href="{{ route('admin.courses.resources.index', $course) }}" class="btn-primary">{{ __('ui.admin_courses.manage_resources') }}</a>
                             <form method="POST" action="{{ route('admin.courses.destroy', $course) }}" onsubmit="return confirm('{{ __('ui.admin_courses.delete_confirm') }}')">
                                 @csrf
                                 @method('DELETE')
