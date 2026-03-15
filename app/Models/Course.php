@@ -27,8 +27,11 @@ class Course extends Model
         'id',
         'category',
         'title',
+        'title_ar',
         'description',
+        'description_ar',
         'content',
+        'content_ar',
         'cover_path',
         'duration_minutes',
         'media_path',
@@ -53,5 +56,45 @@ class Course extends Model
             'driving_safety' => __('ui.classroom.categories.driving_safety'),
             'vehicle_basics' => __('ui.classroom.categories.vehicle_basics'),
         ];
+    }
+
+    public function titleForLocale(?string $locale = null): ?string
+    {
+        $locale ??= app()->getLocale();
+
+        if ($locale === 'ar') {
+            return $this->title_ar;
+        }
+
+        return $this->title;
+    }
+
+    public function descriptionForLocale(?string $locale = null): ?string
+    {
+        $locale ??= app()->getLocale();
+
+        if ($locale === 'ar') {
+            return $this->description_ar;
+        }
+
+        return $this->description;
+    }
+
+    public function contentForLocale(?string $locale = null): ?string
+    {
+        $locale ??= app()->getLocale();
+
+        if ($locale === 'ar') {
+            return $this->content_ar;
+        }
+
+        return $this->content;
+    }
+
+    public function hasArabicTranslation(): bool
+    {
+        return filled($this->title_ar)
+            || filled($this->description_ar)
+            || filled($this->content_ar);
     }
 }
