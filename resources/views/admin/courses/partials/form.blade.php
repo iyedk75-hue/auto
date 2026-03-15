@@ -96,7 +96,7 @@
             <p class="mt-2 text-xs text-slate-400">{{ __('ui.admin_courses.media_hint') }}</p>
             <x-input-error :messages="$errors->get('media')" class="mt-2" />
             @if ($course->media_path)
-                <a href="{{ Storage::url($course->media_path) }}" class="mt-2 inline-flex text-xs font-semibold text-sky-600 underline" target="_blank" rel="noreferrer">
+                <a href="{{ $course->mediaUrl() }}" class="mt-2 inline-flex text-xs font-semibold text-sky-600 underline" target="_blank" rel="noreferrer">
                     {{ __('ui.admin_courses.media_current') }}
                 </a>
             @endif
@@ -107,7 +107,7 @@
             <p class="mt-2 text-xs text-slate-400">{{ __('ui.admin_courses.pdf_hint') }}</p>
             <x-input-error :messages="$errors->get('pdf')" class="mt-2" />
             @if ($course->pdf_path)
-                <a href="{{ Storage::url($course->pdf_path) }}" class="mt-2 inline-flex text-xs font-semibold text-sky-600 underline" target="_blank" rel="noreferrer">
+                <a href="{{ $course->pdfUrl() }}" class="mt-2 inline-flex text-xs font-semibold text-sky-600 underline" target="_blank" rel="noreferrer">
                     {{ __('ui.admin_courses.pdf_current') }}
                 </a>
             @endif

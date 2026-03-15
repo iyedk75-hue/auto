@@ -233,6 +233,9 @@ return [
         'none' => '-',
         'arabic_unavailable_title' => 'Arabic not available yet',
         'arabic_unavailable_body' => 'Cette leçon n’a pas encore de contenu arabe. Vous pouvez revenir plus tard ou continuer en français.',
+        'protection_notice_title' => 'Espace protégé',
+        'protection_notice_body' => 'Lecture en ligne uniquement. Le clic droit et certains raccourcis d’enregistrement ou de copie sont bloqués.',
+        'protection_feedback' => 'Action bloquée sur cette page protégée.',
         'categories' => [
             'priority_rules' => 'Règles de priorité',
             'traffic_signs' => 'Signalisation routière',

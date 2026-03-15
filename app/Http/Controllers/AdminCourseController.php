@@ -38,7 +38,7 @@ class AdminCourseController extends Controller
         $mediaPath = null;
         $mediaMime = null;
         if ($request->hasFile('media')) {
-            $mediaPath = $request->file('media')->store('courses/media', 'public');
+            $mediaPath = $request->file('media')->store(Course::PROTECTED_MEDIA_DIRECTORY, 'local');
             $mediaMime = $request->file('media')->getMimeType();
         }
 
@@ -49,7 +49,7 @@ class AdminCourseController extends Controller
 
         $pdfPath = null;
         if ($request->hasFile('pdf')) {
-            $pdfPath = $request->file('pdf')->store('courses/pdf', 'public');
+            $pdfPath = $request->file('pdf')->store(Course::PROTECTED_PDF_DIRECTORY, 'local');
         }
 
         Course::create([
@@ -90,10 +90,8 @@ class AdminCourseController extends Controller
         $mediaPath = $course->media_path;
         $mediaMime = $course->media_mime;
         if ($request->hasFile('media')) {
-            if ($course->media_path) {
-                Storage::disk('public')->delete($course->media_path);
-            }
-            $mediaPath = $request->file('media')->store('courses/media', 'public');
+            $course->deleteMediaAsset();
+            $mediaPath = $request->file('media')->store(Course::PROTECTED_MEDIA_DIRECTORY, 'local');
             $mediaMime = $request->file('media')->getMimeType();
         }
 
@@ -107,10 +105,8 @@ class AdminCourseController extends Controller
 
         $pdfPath = $course->pdf_path;
         if ($request->hasFile('pdf')) {
-            if ($course->pdf_path) {
-                Storage::disk('public')->delete($course->pdf_path);
-            }
-            $pdfPath = $request->file('pdf')->store('courses/pdf', 'public');
+            $course->deletePdfAsset();
+            $pdfPath = $request->file('pdf')->store(Course::PROTECTED_PDF_DIRECTORY, 'local');
         }
 
         $course->update([
@@ -137,6 +133,13 @@ class AdminCourseController extends Controller
 
     public function destroy(Course $course): RedirectResponse
     {
+        $course->deleteMediaAsset();
+        $course->deletePdfAsset();
+
+        if ($course->cover_path) {
+            Storage::disk('public')->delete($course->cover_path);
+        }
+
         $course->delete();
 
         return redirect()

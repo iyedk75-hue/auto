@@ -3,11 +3,11 @@ id: M001
 completed_slices:
   - S01
   - S02
-active_slices:
   - S03
+active_slices:
   - S04
   - S05
-completed_at: 2026-03-15T08:12:00Z
+completed_at: 2026-03-15T08:47:00Z
 ---
 
 # M001: Bilingual protected learning experience — Summary
@@ -28,19 +28,29 @@ completed_at: 2026-03-15T08:12:00Z
 - Updated candidate lesson rendering to use Arabic content when available and show a clear unavailable state when it is not.
 - Verified with passing `CourseLocalizationTest`, `AdminCourseTest`, `LocaleSwitchTest`, and a production Vite build.
 
+### S03 — Protected inline learning viewer
+- Moved new lesson media/PDF uploads to private local storage while preserving legacy public-asset compatibility.
+- Added authenticated inline media/PDF routes for candidate viewing and admin preview.
+- Removed direct public lesson-asset URLs from candidate lesson HTML.
+- Added visible viewer deterrence and page-scoped blocking for right-click and common save/copy shortcuts.
+- Verified with passing `CourseProtectionTest`, `AdminCourseTest`, and a production Vite build.
+
 ## What This Unlocks Next
 
-- S03 can move PDF/video delivery behind protected routes while reusing the bilingual course page and explicit unavailable-state behavior.
-- S04 can remove the public anti-piracy block from an already localized landing page.
-- S05 can verify the assembled bilingual admin/student flow with protected lesson access.
+- S04 can remove the public anti-piracy block from an already localized landing page without affecting lesson protection.
+- S05 can verify the assembled bilingual admin/student flow, private lesson delivery, and public landing cleanup together end-to-end.
 
 ## Drill-Down Paths
 
 - `.gsd/milestones/M001/slices/S01/S01-SUMMARY.md`
 - `.gsd/milestones/M001/slices/S02/S02-SUMMARY.md`
+- `.gsd/milestones/M001/slices/S03/S03-SUMMARY.md`
 - `.gsd/milestones/M001/slices/S01/tasks/T01-SUMMARY.md`
 - `.gsd/milestones/M001/slices/S01/tasks/T02-SUMMARY.md`
 - `.gsd/milestones/M001/slices/S01/tasks/T03-SUMMARY.md`
 - `.gsd/milestones/M001/slices/S02/tasks/T01-SUMMARY.md`
 - `.gsd/milestones/M001/slices/S02/tasks/T02-SUMMARY.md`
 - `.gsd/milestones/M001/slices/S02/tasks/T03-SUMMARY.md`
+- `.gsd/milestones/M001/slices/S03/tasks/T01-SUMMARY.md`
+- `.gsd/milestones/M001/slices/S03/tasks/T02-SUMMARY.md`
+- `.gsd/milestones/M001/slices/S03/tasks/T03-SUMMARY.md`

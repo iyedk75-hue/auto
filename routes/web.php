@@ -46,6 +46,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 ->route('courses.index')
                 ->with('error', 'Cours introuvable. Veuillez sélectionner un cours depuis la liste.');
         });
+    Route::get('/courses/{course}/media', [CandidateCourseController::class, 'media'])->name('courses.media');
     Route::get('/courses/{course}/pdf', [CandidateCourseController::class, 'pdf'])->name('courses.pdf');
     Route::get('/payments', [CandidatePaymentController::class, 'index'])->name('payments.index');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

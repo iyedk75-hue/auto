@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class CandidateCourseController extends Controller
 {
@@ -63,26 +65,46 @@ class CandidateCourseController extends Controller
         ]);
     }
 
-    public function pdf(Course $course)
+    public function media(Course $course, Request $request): BinaryFileResponse|RedirectResponse
     {
-        if (auth()->user()?->isAdmin()) {
-            return redirect()->route('admin.dashboard');
-        }
+        [$disk, $path] = $this->resolveProtectedAsset($course, $course->media_path, $course->mediaDisk(), $request);
 
-        if (! $course->is_active || ! $course->pdf_path) {
-            abort(404);
-        }
-
-        if (! Storage::disk('public')->exists($course->pdf_path)) {
-            abort(404);
-        }
-
-        $path = Storage::disk('public')->path($course->pdf_path);
-        $filename = basename($course->pdf_path);
-
-        return response()->file($path, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="'.$filename.'"',
+        return response()->file(Storage::disk($disk)->path($path), [
+            'Content-Type' => $course->media_mime ?? 'application/octet-stream',
+            'Content-Disposition' => 'inline; filename="'.basename($path).'"',
+            'Cache-Control' => 'private, no-store, max-age=0',
+            'X-Robots-Tag' => 'noindex, nofollow',
         ]);
+    }
+
+    public function pdf(Course $course, Request $request): BinaryFileResponse|RedirectResponse
+    {
+        [$disk, $path] = $this->resolveProtectedAsset($course, $course->pdf_path, $course->pdfDisk(), $request);
+
+        return response()->file(Storage::disk($disk)->path($path), [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.basename($path).'"',
+            'Cache-Control' => 'private, no-store, max-age=0',
+            'X-Robots-Tag' => 'noindex, nofollow',
+        ]);
+    }
+
+    /**
+     * @return array{0:string,1:string}
+     */
+    private function resolveProtectedAsset(Course $course, ?string $path, ?string $disk, Request $request): array
+    {
+        $user = $request->user();
+
+        abort_unless($user, 403);
+        abort_if(blank($path) || blank($disk), 404);
+
+        if (! $user->isAdmin() && ! $course->is_active) {
+            abort(404);
+        }
+
+        abort_unless(Storage::disk($disk)->exists($path), 404);
+
+        return [$disk, $path];
     }
 }

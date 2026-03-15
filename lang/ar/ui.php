@@ -233,6 +233,9 @@ return [
         'none' => '-',
         'arabic_unavailable_title' => 'العربية غير متاحة بعد',
         'arabic_unavailable_body' => 'هذا الدرس لا يحتوي بعد على محتوى عربي. يمكنك العودة لاحقًا أو المتابعة بالفرنسية.',
+        'protection_notice_title' => 'مساحة محمية',
+        'protection_notice_body' => 'القراءة والمشاهدة عبر الإنترنت فقط. النقر بالزر الأيمن وبعض اختصارات الحفظ أو النسخ معطلة.',
+        'protection_feedback' => 'تم حظر هذا الإجراء على هذه الصفحة المحمية.',
         'categories' => [
             'priority_rules' => 'قواعد الأولوية',
             'traffic_signs' => 'إشارات المرور',

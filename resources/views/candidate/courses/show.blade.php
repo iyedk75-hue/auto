@@ -1,6 +1,6 @@
 <x-app-layout>
     <div class="py-10">
-        <div class="mx-auto max-w-5xl space-y-8 px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-5xl space-y-8 px-4 sm:px-6 lg:px-8" data-protected-course-viewer data-protection-message="{{ __('ui.classroom.protection_feedback') }}">
             <div class="classroom-hero">
                 <div class="classroom-hero-banner" @if ($course->cover_path) style="background-image: linear-gradient(135deg, rgba(15, 23, 42, 0.5), rgba(30, 58, 138, 0.4)), url('{{ Storage::url($course->cover_path) }}'); background-size: cover; background-position: center;" @endif></div>
                 <div class="classroom-hero-content">
@@ -10,6 +10,11 @@
                         <p class="text-sm font-semibold text-slate-500">{{ __('ui.classroom.estimated_duration', ['minutes' => $course->duration_minutes]) }}</p>
                     @endif
                 </div>
+            </div>
+
+            <div class="classroom-section border border-slate-900/10 bg-slate-50">
+                <p class="classroom-section-title">{{ __('ui.classroom.protection_notice_title') }}</p>
+                <p class="classroom-section-text">{{ __('ui.classroom.protection_notice_body') }}</p>
             </div>
 
             @if ($showArabicUnavailable)
@@ -22,19 +27,16 @@
             <div class="grid gap-6 lg:grid-cols-[2fr_1fr]">
                 <div class="space-y-6">
                     @if ($course->media_path)
-                        @php
-                            $mediaUrl = Storage::url($course->media_path);
-                        @endphp
                         <div class="classroom-section">
                             <p class="classroom-section-title">{{ __('ui.classroom.primary_support') }}</p>
                             <div class="mt-4">
                                 @if ($course->media_mime &&
                                     (Str::startsWith($course->media_mime, 'video/') || Str::endsWith($course->media_mime, ['mp4', 'webm'])))
-                                    <video class="w-full rounded-3xl" controls>
-                                        <source src="{{ $mediaUrl }}" type="{{ $course->media_mime ?? 'video/mp4' }}" />
+                                    <video class="w-full rounded-3xl" controls controlsList="nodownload noplaybackrate" disablePictureInPicture>
+                                        <source src="{{ route('courses.media', $course) }}" type="{{ $course->media_mime ?? 'video/mp4' }}" />
                                     </video>
                                 @else
-                                    <img src="{{ $mediaUrl }}" alt="{{ $localizedTitle }}" class="w-full rounded-3xl object-cover" />
+                                    <img src="{{ route('courses.media', $course) }}" alt="{{ $localizedTitle }}" class="w-full rounded-3xl object-cover" draggable="false" />
                                 @endif
                             </div>
                         </div>
@@ -100,5 +102,7 @@
                 </aside>
             </div>
         </div>
+
+        <div class="protection-feedback hidden" data-protection-feedback></div>
     </div>
 </x-app-layout>

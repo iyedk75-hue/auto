@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Course extends Model
 {
@@ -15,6 +17,10 @@ class Course extends Model
     public $incrementing = false;
 
     protected $keyType = 'string';
+
+    public const PROTECTED_MEDIA_DIRECTORY = 'courses/protected/media';
+
+    public const PROTECTED_PDF_DIRECTORY = 'courses/protected/pdf';
 
     public const CATEGORIES = [
         'priority_rules',
@@ -96,5 +102,73 @@ class Course extends Model
         return filled($this->title_ar)
             || filled($this->description_ar)
             || filled($this->content_ar);
+    }
+
+    public function mediaDisk(): ?string
+    {
+        return $this->assetDisk($this->media_path);
+    }
+
+    public function pdfDisk(): ?string
+    {
+        return $this->assetDisk($this->pdf_path);
+    }
+
+    public function mediaUrl(): ?string
+    {
+        if (! $this->media_path) {
+            return null;
+        }
+
+        return route('courses.media', $this);
+    }
+
+    public function pdfUrl(): ?string
+    {
+        if (! $this->pdf_path) {
+            return null;
+        }
+
+        return route('courses.pdf', $this);
+    }
+
+    public function deleteMediaAsset(): void
+    {
+        $this->deleteAsset($this->media_path);
+    }
+
+    public function deletePdfAsset(): void
+    {
+        $this->deleteAsset($this->pdf_path);
+    }
+
+    private function deleteAsset(?string $path): void
+    {
+        $disk = $this->assetDisk($path);
+
+        if ($disk && $path) {
+            Storage::disk($disk)->delete($path);
+        }
+    }
+
+    private function assetDisk(?string $path): ?string
+    {
+        if (blank($path)) {
+            return null;
+        }
+
+        if (Storage::disk('local')->exists($path)) {
+            return 'local';
+        }
+
+        if (Storage::disk('public')->exists($path)) {
+            return 'public';
+        }
+
+        if (Str::startsWith($path, 'courses/protected/')) {
+            return 'local';
+        }
+
+        return 'public';
     }
 }
