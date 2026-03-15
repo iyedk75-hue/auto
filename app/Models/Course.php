@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -62,6 +63,11 @@ class Course extends Model
             'driving_safety' => __('ui.classroom.categories.driving_safety'),
             'vehicle_basics' => __('ui.classroom.categories.vehicle_basics'),
         ];
+    }
+
+    public function resources(): HasMany
+    {
+        return $this->hasMany(CourseResource::class)->orderBy('sort_order')->orderBy('created_at');
     }
 
     public function titleForLocale(?string $locale = null): ?string
