@@ -49,6 +49,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
     Route::get('/courses/{course}/media', [CandidateCourseController::class, 'media'])->name('courses.media');
     Route::get('/courses/{course}/pdf', [CandidateCourseController::class, 'pdf'])->name('courses.pdf');
+    Route::get('/courses/{course}/resources/{resource}/file', [CandidateCourseController::class, 'resourceFile'])->name('courses.resources.file');
     Route::get('/payments', [CandidatePaymentController::class, 'index'])->name('payments.index');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

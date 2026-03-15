@@ -56,10 +56,10 @@ This milestone is complete only when all are true:
 - [x] **S02: Admin multi-resource management** `risk:medium` `depends:[S01]`
   > After this: admin can add, edit, order, and remove many video, PDF, and note resources inside one course.
 
-- [ ] **S03: Student classroom-style resource list** `risk:medium` `depends:[S01,S02]`
+- [x] **S03: Student classroom-style resource list** `risk:medium` `depends:[S01,S02]`
   > After this: a student opens a course, sees a stacked support list with type/date, and opens any selected resource below the list on the same page.
 
-- [ ] **S04: Protected resource delivery and final integration** `risk:high` `depends:[S02,S03]`
+- [x] **S04: Protected resource delivery and final integration** `risk:high` `depends:[S02,S03]`
   > After this: file resources remain protected, notes render inline, and the full admin-to-student multi-resource course flow works end-to-end.
 
 ## Boundary Map

@@ -14,117 +14,119 @@ Guidelines:
 
 ## Active
 
+None.
+
+## Validated
+
 ### R012 — Courses support multiple learning resources
 - Class: core-capability
-- Status: active
+- Status: validated
 - Description: A single course can contain multiple learning resources instead of only one video/image slot and one PDF slot.
 - Why it matters: The requested classroom experience depends on an ordered list of many supports inside one course.
 - Source: user
 - Primary owning slice: M002/S01
 - Supporting slices: M002/S02, M002/S03, M002/S04
-- Validation: mapped
-- Notes: The model must move beyond the current one-file-per-course structure without breaking existing courses.
+- Validation: validated
+- Notes: Proven through `course_resources`, transition compatibility, and the final assembled multi-resource flow.
 
 ### R013 — Admin can add and manage many resources per course
 - Class: admin/support
-- Status: active
+- Status: validated
 - Description: Admin users can create, edit, remove, and manage multiple resources for a course.
 - Why it matters: Multi-resource courses are useless unless the school can author and maintain them.
 - Source: user
 - Primary owning slice: M002/S02
 - Supporting slices: M002/S04
-- Validation: mapped
-- Notes: Management must include resource metadata and content, not only raw file upload.
+- Validation: validated
+- Notes: Proven through nested admin resource CRUD, management pages, and end-to-end milestone coverage.
 
 ### R014 — Supported resource types include video, PDF, and admin note
 - Class: core-capability
-- Status: active
+- Status: validated
 - Description: Course resources can be videos, PDFs, or note entries written directly by the admin.
 - Why it matters: The user explicitly wants files plus written notes within the same course support system.
 - Source: user
 - Primary owning slice: M002/S02
 - Supporting slices: M002/S03, M002/S04
-- Validation: mapped
+- Validation: validated
 - Notes: Notes are first-class resources, not an afterthought or fallback field.
 
 ### R015 — Student sees a Classroom-style stacked support list inside the course
 - Class: primary-user-loop
-- Status: active
+- Status: validated
 - Description: The course page shows a stacked support list inspired by the provided Classroom screenshot.
 - Why it matters: The requested student experience is list-first, not a single hero viewer with one file.
 - Source: user
 - Primary owning slice: M002/S03
 - Supporting slices: M002/S04
-- Validation: mapped
-- Notes: The list should visually read as separate support items rather than generic file links.
+- Validation: validated
+- Notes: Proven by the candidate feed UI, browser verification, and feature coverage.
 
 ### R016 — Clicking a support opens it below the list on the same course page
 - Class: primary-user-loop
-- Status: active
+- Status: validated
 - Description: When a student selects a resource, it opens inside the same course page below the list rather than on a separate page.
 - Why it matters: The user explicitly rejected separate pages and wants one continuous course-viewing surface.
 - Source: user
 - Primary owning slice: M002/S03
 - Supporting slices: M002/S04
-- Validation: mapped
+- Validation: validated
 - Notes: This applies to video, PDF, and note resources.
 
 ### R017 — Resource order is controlled manually by admin
 - Class: admin/support
-- Status: active
+- Status: validated
 - Description: The admin decides the exact order in which resources appear to the student.
 - Why it matters: The support list needs to behave like a chapter/lesson sequence, not an accidental upload order.
 - Source: user
 - Primary owning slice: M002/S02
 - Supporting slices: M002/S03
-- Validation: mapped
-- Notes: The first iteration may use explicit numeric ordering rather than drag-and-drop UI.
+- Validation: validated
+- Notes: The first iteration uses explicit numeric ordering rather than drag-and-drop UI.
 
 ### R018 — Each support item shows type and date
 - Class: quality-attribute
-- Status: active
+- Status: validated
 - Description: Each resource item in the student list shows at least its type and date in addition to its title.
 - Why it matters: The list needs enough context to feel like a real classroom feed rather than a plain filename list.
 - Source: user
 - Primary owning slice: M002/S03
 - Supporting slices: none
-- Validation: mapped
-- Notes: Date source can be created-at or explicit publish metadata, depending on the implemented contract.
+- Validation: validated
+- Notes: Date is currently sourced from resource creation time in the normalized resource contract.
 
 ### R019 — File-resource protection still applies per resource
 - Class: compliance/security
-- Status: active
+- Status: validated
 - Description: Videos and PDFs in the new multi-resource system still use protected storage, authenticated delivery, and the existing deterrence behavior.
 - Why it matters: The multi-resource redesign must not regress the protection work already delivered in M001.
 - Source: inferred
 - Primary owning slice: M002/S04
 - Supporting slices: M002/S01, M002/S03
-- Validation: mapped
-- Notes: Notes do not need file-route protection, but file resources do.
+- Validation: validated
+- Notes: Proven through protected child-resource routes, regression tests, and milestone integration coverage.
 
 ### R020 — Existing single-resource courses remain usable during transition
 - Class: continuity
-- Status: active
+- Status: validated
 - Description: Existing courses created under the single-media/PDF model still work while the new resource model is introduced.
 - Why it matters: The project already has a running course system; the transition cannot strand existing records.
 - Source: inferred
 - Primary owning slice: M002/S01
 - Supporting slices: M002/S04
-- Validation: mapped
-- Notes: This can be handled by migration, compatibility logic, or both.
+- Validation: validated
+- Notes: Proven through legacy resource synthesis and live/browser legacy-course rendering.
 
 ### R021 — Final integrated multi-resource course flow is proven end-to-end
 - Class: integration
-- Status: active
+- Status: validated
 - Description: The milestone is complete only when admin multi-resource authoring and student same-page resource viewing are exercised together end-to-end.
 - Why it matters: This milestone crosses data model, admin UI, student UI, and protected file delivery boundaries.
 - Source: inferred
 - Primary owning slice: M002/S04
 - Supporting slices: M002/S01, M002/S02, M002/S03
-- Validation: mapped
-- Notes: Final proof must include at least one file resource and one note resource.
-
-## Validated
+- Validation: validated
+- Notes: Proven through `MilestoneIntegrationTest` with note, video, and PDF resources plus browser verification of the candidate viewer.
 
 ### R001 — Bilingual interface across public, candidate, and admin areas
 - Class: core-capability
@@ -299,16 +301,16 @@ Guidelines:
 
 | ID | Class | Status | Primary owner | Supporting | Proof |
 |---|---|---|---|---|---|
-| R012 | core-capability | active | M002/S01 | M002/S02, M002/S03, M002/S04 | mapped |
-| R013 | admin/support | active | M002/S02 | M002/S04 | mapped |
-| R014 | core-capability | active | M002/S02 | M002/S03, M002/S04 | mapped |
-| R015 | primary-user-loop | active | M002/S03 | M002/S04 | mapped |
-| R016 | primary-user-loop | active | M002/S03 | M002/S04 | mapped |
-| R017 | admin/support | active | M002/S02 | M002/S03 | mapped |
-| R018 | quality-attribute | active | M002/S03 | none | mapped |
-| R019 | compliance/security | active | M002/S04 | M002/S01, M002/S03 | mapped |
-| R020 | continuity | active | M002/S01 | M002/S04 | mapped |
-| R021 | integration | active | M002/S04 | M002/S01, M002/S02, M002/S03 | mapped |
+| R012 | core-capability | validated | M002/S01 | M002/S02, M002/S03, M002/S04 | validated |
+| R013 | admin/support | validated | M002/S02 | M002/S04 | validated |
+| R014 | core-capability | validated | M002/S02 | M002/S03, M002/S04 | validated |
+| R015 | primary-user-loop | validated | M002/S03 | M002/S04 | validated |
+| R016 | primary-user-loop | validated | M002/S03 | M002/S04 | validated |
+| R017 | admin/support | validated | M002/S02 | M002/S03 | validated |
+| R018 | quality-attribute | validated | M002/S03 | none | validated |
+| R019 | compliance/security | validated | M002/S04 | M002/S01, M002/S03 | validated |
+| R020 | continuity | validated | M002/S01 | M002/S04 | validated |
+| R021 | integration | validated | M002/S04 | M002/S01, M002/S02, M002/S03 | validated |
 | R001 | core-capability | validated | M001/S01 | M001/S02, M001/S03, M001/S04, M001/S05 | validated |
 | R002 | quality-attribute | validated | M001/S01 | M001/S05 | validated |
 | R003 | admin/support | validated | M001/S02 | M001/S05 | validated |
@@ -327,7 +329,7 @@ Guidelines:
 
 ## Coverage Summary
 
-- Active requirements: 10
-- Mapped to slices: 10
-- Validated: 8
+- Active requirements: 0
+- Mapped to slices: 0
+- Validated: 18
 - Unmapped active requirements: 0

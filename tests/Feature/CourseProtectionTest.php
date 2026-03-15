@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Course;
+use App\Models\CourseResource;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -157,6 +158,37 @@ class CourseProtectionTest extends TestCase
             ->assertOk();
     }
 
+    public function test_guest_cannot_access_protected_child_resource_files(): void
+    {
+        Storage::fake('local');
+        $course = $this->makeProtectedResourceCourse();
+        $video = $course->resources()->where('resource_type', CourseResource::TYPE_VIDEO)->firstOrFail();
+
+        $this->get(route('courses.resources.file', [$course, $video]))
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_candidate_can_access_protected_child_resource_files_through_inline_route(): void
+    {
+        Storage::fake('local');
+        $candidate = User::factory()->create();
+        $course = $this->makeProtectedResourceCourse();
+        $video = $course->resources()->where('resource_type', CourseResource::TYPE_VIDEO)->firstOrFail();
+        $pdf = $course->resources()->where('resource_type', CourseResource::TYPE_PDF)->firstOrFail();
+
+        $this->actingAs($candidate)
+            ->get(route('courses.resources.file', [$course, $video]))
+            ->assertOk()
+            ->assertHeader('content-type', 'video/mp4')
+            ->assertHeader('content-disposition', 'inline; filename="chapter-video.mp4"');
+
+        $this->actingAs($candidate)
+            ->get(route('courses.resources.file', [$course, $pdf]))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf')
+            ->assertHeader('content-disposition', 'inline; filename="chapter-guide.pdf"');
+    }
+
     public function test_candidate_course_page_uses_protected_asset_routes_not_public_storage_urls(): void
     {
         Storage::fake('local');
@@ -164,15 +196,36 @@ class CourseProtectionTest extends TestCase
         $course = $this->makeProtectedCourse();
 
         $this->actingAs($candidate)
+            ->withSession(['locale' => 'fr'])
+            ->withCookie('massar_locale', 'fr')
             ->get(route('courses.show', $course))
             ->assertOk()
             ->assertSee(route('courses.media', $course), false)
-            ->assertSee(route('courses.pdf', $course), false)
+            ->assertSee('?resource=legacy-pdf#course-resource-viewer', false)
             ->assertSee('data-protected-course-viewer', false)
+            ->assertSee('data-course-resource-viewer', false)
             ->assertSee('controlsList="nodownload noplaybackrate"', false)
-            ->assertSee(__('ui.classroom.protection_notice_title'))
+            ->assertSee('Supports du cours')
             ->assertDontSee('/storage/courses/media', false)
             ->assertDontSee('/storage/courses/pdf', false);
+    }
+
+    public function test_candidate_course_page_uses_protected_child_resource_routes_not_public_storage_urls(): void
+    {
+        Storage::fake('local');
+        $candidate = User::factory()->create();
+        $course = $this->makeProtectedResourceCourse();
+        $pdf = $course->resources()->where('resource_type', CourseResource::TYPE_PDF)->firstOrFail();
+
+        $this->actingAs($candidate)
+            ->withSession(['locale' => 'fr'])
+            ->withCookie('massar_locale', 'fr')
+            ->get(route('courses.show', ['course' => $course, 'resource' => $pdf->id]))
+            ->assertOk()
+            ->assertSee('data-selected-resource-key="'.$pdf->id.'"', false)
+            ->assertSee(route('courses.resources.file', [$course, $pdf]), false)
+            ->assertSee('Supports du cours')
+            ->assertDontSee('/storage/courses/protected/resources', false);
     }
 
     private function makeProtectedCourse(): Course
@@ -192,5 +245,52 @@ class CourseProtectionTest extends TestCase
             'sort_order' => 1,
             'is_active' => true,
         ]);
+    }
+
+    private function makeProtectedResourceCourse(): Course
+    {
+        Storage::disk('local')->put('courses/protected/resources/video/chapter-video.mp4', 'video-data');
+        Storage::disk('local')->put('courses/protected/resources/pdf/chapter-guide.pdf', 'pdf-data');
+
+        $course = Course::create([
+            'id' => (string) Str::uuid(),
+            'category' => Course::CATEGORIES[0],
+            'title' => 'Protected resource lesson',
+            'description' => 'Protected description',
+            'content' => 'Protected content',
+            'sort_order' => 1,
+            'is_active' => true,
+        ]);
+
+        $course->resources()->createMany([
+            [
+                'id' => (string) Str::uuid(),
+                'resource_type' => CourseResource::TYPE_NOTE,
+                'title' => 'Chapitre I',
+                'note_body' => 'Texte de note',
+                'sort_order' => 1,
+                'is_active' => true,
+            ],
+            [
+                'id' => (string) Str::uuid(),
+                'resource_type' => CourseResource::TYPE_VIDEO,
+                'title' => 'Vidéo protégée',
+                'file_path' => 'courses/protected/resources/video/chapter-video.mp4',
+                'file_mime' => 'video/mp4',
+                'sort_order' => 2,
+                'is_active' => true,
+            ],
+            [
+                'id' => (string) Str::uuid(),
+                'resource_type' => CourseResource::TYPE_PDF,
+                'title' => 'PDF protégé',
+                'file_path' => 'courses/protected/resources/pdf/chapter-guide.pdf',
+                'file_mime' => 'application/pdf',
+                'sort_order' => 3,
+                'is_active' => true,
+            ],
+        ]);
+
+        return $course->fresh('resources');
     }
 }
