@@ -1,18 +1,18 @@
 # GSD State
 
-**Active Milestone:** None
-**Active Slice:** None
-**Active Task:** None
-**Phase:** M001 complete
+**Active Milestone:** M002 — Multi-resource classroom course flow
+**Active Slice:** S01 — Resource model and transition layer
+**Active Task:** None — slice plan not written yet
+**Phase:** Ready for slice planning
 
 ## Recent Decisions
-- New lesson media and PDFs live on private storage; legacy public lesson assets resolve through compatibility helpers.
-- Protected lesson assets are consumed only through authenticated inline routes.
-- Admin previews reuse the protected asset routes so private storage does not break course management.
-- Viewer protection is explicit deterrence with visible messaging and blocked casual-copy actions.
+- Multi-resource courses will use a child resource model instead of adding more single-resource columns to `courses`.
+- Selected resources must open below the list inside the same course page.
+- First-class resource types are video, PDF, and admin-written note.
+- The first version will use explicit admin-controlled manual ordering.
 
 ## Blockers
 - None
 
 ## Next Action
-Milestone M001 is complete. Await user direction for a new milestone or follow-up fixes.
+Read `.gsd/milestones/M002/M002-CONTEXT.md`, `.gsd/milestones/M002/M002-ROADMAP.md`, `.gsd/DECISIONS.md`, and `.gsd/milestones/M001/M001-SUMMARY.md`, then create `.gsd/milestones/M002/slices/S01/S01-PLAN.md` for the resource model and transition layer.
