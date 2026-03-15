@@ -44,13 +44,13 @@
   - Do: Create the `course_resources` table and model, define supported types and ordering fields, add the course relation, and write tests proving typed ordered resources persist correctly.
   - Verify: `php artisan test --filter=CourseResourceModelTest`
   - Done when: Courses can own many ordered resources of type video/pdf/note and tests prove the contract.
-- [ ] **T02: Add normalized resource resolution with legacy compatibility** `est:1h`
+- [x] **T02: Add normalized resource resolution with legacy compatibility** `est:1h`
   - Why: Existing courses still use single `media_path` / `pdf_path` fields and must remain usable while the new model rolls out.
   - Files: `app/Models/Course.php`, `app/Models/CourseResource.php`, `tests/Feature/CourseTransitionTest.php`, `database/seeders/DatabaseSeeder.php`
   - Do: Add helpers that resolve a course’s effective resource list from child resources first and legacy file fields second, include stable ordering/origin metadata, and update seeds or fixtures as needed for transition coverage.
   - Verify: `php artisan test --filter=CourseTransitionTest`
   - Done when: A legacy course with no child resources still resolves into a usable normalized resource list, and a new multi-resource course resolves from child records only.
-- [ ] **T03: Expose a downstream-ready resource shape for later slices** `est:45m`
+- [x] **T03: Expose a downstream-ready resource shape for later slices** `est:45m`
   - Why: Admin and student UIs in S02/S03 should consume one stable resource shape instead of rebuilding mapping logic.
   - Files: `app/Models/CourseResource.php`, `app/Models/Course.php`, `tests/Feature/CourseTransitionTest.php`
   - Do: Add locale-aware title/body helpers and normalized data output that downstream admin/student views can use, including support for note resources and file-resource metadata.

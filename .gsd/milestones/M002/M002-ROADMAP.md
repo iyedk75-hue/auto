@@ -50,7 +50,7 @@ This milestone is complete only when all are true:
 
 ## Slices
 
-- [ ] **S01: Resource model and transition layer** `risk:high` `depends:[]`
+- [x] **S01: Resource model and transition layer** `risk:high` `depends:[]`
   > After this: courses can represent many resources, and older single-resource courses still remain usable during the transition.
 
 - [ ] **S02: Admin multi-resource management** `risk:medium` `depends:[S01]`

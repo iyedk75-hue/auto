@@ -1,18 +1,18 @@
 # GSD State
 
 **Active Milestone:** M002 — Multi-resource classroom course flow
-**Active Slice:** S01 — Resource model and transition layer
-**Active Task:** T02 — Add normalized resource resolution with legacy compatibility
-**Phase:** Executing
+**Active Slice:** S02 — Admin multi-resource management
+**Active Task:** None — slice plan not written yet
+**Phase:** Ready for slice planning
 
 ## Recent Decisions
-- Multi-resource courses now use a real `course_resources` child model.
+- Multi-resource courses now use a real `course_resources` child model with ordered supports.
 - Resource titles and note bodies use French primary fields with optional Arabic companion fields.
-- Selected resources must open below the list inside the same course page.
-- The first version uses explicit admin-controlled manual ordering.
+- Child resources take precedence over legacy course file fields when both exist.
+- Legacy single-resource courses resolve into synthetic ordered resource items during the transition.
 
 ## Blockers
 - None
 
 ## Next Action
-Add normalized resource resolution helpers so legacy single-resource courses still expose a usable ordered support list while new courses resolve from child resources first.
+Read `.gsd/milestones/M002/M002-CONTEXT.md`, `.gsd/milestones/M002/M002-ROADMAP.md`, `.gsd/DECISIONS.md`, and `.gsd/milestones/M002/slices/S01/S01-SUMMARY.md`, then create `.gsd/milestones/M002/slices/S02/S02-PLAN.md` for admin multi-resource management.

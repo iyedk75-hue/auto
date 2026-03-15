@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -146,6 +147,94 @@ class Course extends Model
     public function deletePdfAsset(): void
     {
         $this->deleteAsset($this->pdf_path);
+    }
+
+    public function hasPersistedResources(): bool
+    {
+        return $this->resources()->exists();
+    }
+
+    /**
+     * @return Collection<int, array<string, mixed>>
+     */
+    public function resolvedResources(?string $locale = null): Collection
+    {
+        $locale ??= app()->getLocale();
+        $resources = $this->resources()->where('is_active', true)->get();
+
+        if ($resources->isNotEmpty()) {
+            return $resources->map(fn (CourseResource $resource) => $resource->toResolvedArray($locale))->values();
+        }
+
+        return $this->legacyResolvedResources($locale);
+    }
+
+    /**
+     * @return Collection<int, array<string, mixed>>
+     */
+    public function legacyResolvedResources(?string $locale = null): Collection
+    {
+        $locale ??= app()->getLocale();
+        $legacyResources = collect();
+
+        if ($this->media_path) {
+            $legacyResources->push($this->makeLegacyResource(
+                key: 'legacy-media',
+                type: Str::startsWith((string) $this->media_mime, 'video/') ? CourseResource::TYPE_VIDEO : CourseResource::TYPE_NOTE,
+                title: $this->title.' · '.__('ui.classroom.media'),
+                titleAr: filled($this->title_ar) ? $this->title_ar.' · '.__('ui.classroom.media') : null,
+                filePath: $this->media_path,
+                fileMime: $this->media_mime,
+                sortOrder: 1,
+                locale: $locale,
+            ));
+        }
+
+        if ($this->pdf_path) {
+            $legacyResources->push($this->makeLegacyResource(
+                key: 'legacy-pdf',
+                type: CourseResource::TYPE_PDF,
+                title: $this->title.' · PDF',
+                titleAr: filled($this->title_ar) ? $this->title_ar.' · PDF' : null,
+                filePath: $this->pdf_path,
+                fileMime: 'application/pdf',
+                sortOrder: 2,
+                locale: $locale,
+            ));
+        }
+
+        return $legacyResources
+            ->sortBy(['sort_order', 'created_at'])
+            ->values();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function makeLegacyResource(
+        string $key,
+        string $type,
+        string $title,
+        ?string $titleAr,
+        ?string $filePath,
+        ?string $fileMime,
+        int $sortOrder,
+        ?string $locale = null,
+    ): array {
+        $resource = new CourseResource([
+            'resource_type' => $type,
+            'title' => $title,
+            'title_ar' => $titleAr,
+            'file_path' => $filePath,
+            'file_mime' => $fileMime,
+            'sort_order' => $sortOrder,
+            'is_active' => true,
+        ]);
+
+        $resource->created_at = $this->created_at;
+        $resource->setAttribute('legacy_key', $key);
+
+        return $resource->toResolvedArray($locale);
     }
 
     private function deleteAsset(?string $path): void
