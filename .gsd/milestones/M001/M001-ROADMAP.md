@@ -58,7 +58,7 @@ This milestone is complete only when all are true:
 - [x] **S03: Protected inline learning viewer** `risk:high` `depends:[S01,S02]`
   > After this: a candidate opens one course page and reads PDF / watches video inline through authenticated routes with deterrence protections and no download links.
 
-- [ ] **S04: Public landing cleanup** `risk:low` `depends:[S01]`
+- [x] **S04: Public landing cleanup** `risk:low` `depends:[S01]`
   > After this: the red-circled anti-piracy marketing block is gone and the landing page still reads cleanly in both languages.
 
 - [ ] **S05: End-to-end integration and polish** `risk:medium` `depends:[S02,S03,S04]`

@@ -77,40 +77,5 @@
             </div>
         </section>
 
-        <section class="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
-            <div class="massar-card massar-card-ink">
-                <div class="flex flex-wrap items-center justify-between gap-4">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/60">{{ __('ui.public.security.kicker') }}</p>
-                        <h2 class="massar-title mt-3 text-3xl font-extrabold text-white">{{ __('ui.public.security.title') }}</h2>
-                    </div>
-                    <span class="inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-white/70">{{ __('ui.public.security.badge') }}</span>
-                </div>
-
-                <div class="mt-8 grid gap-4 md:grid-cols-2">
-                    <div class="rounded-2xl bg-white/10 p-4">
-                        <p class="text-sm font-semibold text-white">{{ __('ui.public.security.device_title') }}</p>
-                        <p class="mt-2 text-sm leading-6 text-white/75">{{ __('ui.public.security.device_body') }}</p>
-                    </div>
-                    <div class="rounded-2xl bg-white/10 p-4">
-                        <p class="text-sm font-semibold text-white">{{ __('ui.public.security.capture_title') }}</p>
-                        <p class="mt-2 text-sm leading-6 text-white/75">{{ __('ui.public.security.capture_body') }}</p>
-                    </div>
-                    <div class="rounded-2xl bg-white/10 p-4">
-                        <p class="text-sm font-semibold text-white">{{ __('ui.public.security.watermark_title') }}</p>
-                        <p class="mt-2 text-sm leading-6 text-white/75">{{ __('ui.public.security.watermark_body') }}</p>
-                    </div>
-                    <div class="rounded-2xl bg-white/10 p-4">
-                        <p class="text-sm font-semibold text-white">{{ __('ui.public.security.copy_title') }}</p>
-                        <p class="mt-2 text-sm leading-6 text-white/75">{{ __('ui.public.security.copy_body') }}</p>
-                    </div>
-                </div>
-
-                <div class="mt-8 flex flex-wrap gap-3">
-                    <a href="{{ route('admin.login') }}" class="massar-btn-primary">{{ __('ui.public.admin_cta') }}</a>
-                    <a href="https://wa.me/21699000000" class="massar-btn-ghost" target="_blank" rel="noreferrer">{{ __('ui.public.security.demo_cta') }}</a>
-                </div>
-            </div>
-        </section>
     </div>
 </x-app-layout>

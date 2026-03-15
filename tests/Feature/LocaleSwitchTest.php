@@ -25,7 +25,8 @@ class LocaleSwitchTest extends TestCase
             ->assertOk()
             ->assertSee('lang="ar"', false)
             ->assertSee('dir="rtl"', false)
-            ->assertSee('المقصورة الرقمية لمدارس السياقة التونسية.');
+            ->assertSee('المقصورة الرقمية لمدارس السياقة التونسية.')
+            ->assertDontSee('احمِ محتواك التعليمي.');
     }
 
     public function test_guest_can_switch_back_to_french(): void
@@ -43,7 +44,8 @@ class LocaleSwitchTest extends TestCase
             ->assertOk()
             ->assertSee('lang="fr"', false)
             ->assertSee('dir="ltr"', false)
-            ->assertSee('Le cockpit digital des auto-écoles tunisiennes.');
+            ->assertSee('Le cockpit digital des auto-écoles tunisiennes.')
+            ->assertDontSee('Protégez votre contenu pédagogique.');
     }
 
     public function test_candidate_dashboard_uses_the_selected_locale(): void
