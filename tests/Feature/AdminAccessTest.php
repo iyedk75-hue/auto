@@ -19,6 +19,21 @@ class AdminAccessTest extends TestCase
             ->assertOk();
     }
 
+    public function test_admin_dashboard_renders_arabic_copy_when_locale_is_arabic(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        $this->actingAs($admin)
+            ->withSession(['locale' => 'ar'])
+            ->withCookie('massar_locale', 'ar')
+            ->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee('lang="ar"', false)
+            ->assertSee('dir="rtl"', false)
+            ->assertSee('لوحة تحكم مسار')
+            ->assertSee('الأقسام');
+    }
+
     public function test_candidate_cannot_view_admin_dashboard(): void
     {
         $candidate = User::factory()->create();

@@ -1,5 +1,11 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@php
+    $isRtl = app()->getLocale() === 'ar';
+    $themeClass = auth()->check()
+        ? (auth()->user()->isAdmin() ? 'theme-admin' : 'theme-candidate')
+        : 'theme-guest';
+@endphp
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,12 +19,7 @@
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    @php
-        $themeClass = auth()->check()
-            ? (auth()->user()->isAdmin() ? 'theme-admin' : 'theme-candidate')
-            : 'theme-guest';
-    @endphp
-    <body class="app-body {{ $themeClass }}">
+    <body class="app-body {{ $themeClass }} {{ $isRtl ? 'locale-rtl' : 'locale-ltr' }}">
         <div class="page-shell {{ auth()->check() ? 'page-shell-sidebar' : '' }}">
             @include('layouts.navigation')
 

@@ -4,6 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Course extends Model
 {
@@ -16,6 +20,10 @@ class Course extends Model
 
     protected $keyType = 'string';
 
+    public const PROTECTED_MEDIA_DIRECTORY = 'courses/protected/media';
+
+    public const PROTECTED_PDF_DIRECTORY = 'courses/protected/pdf';
+
     public const CATEGORIES = [
         'priority_rules',
         'traffic_signs',
@@ -27,8 +35,11 @@ class Course extends Model
         'id',
         'category',
         'title',
+        'title_ar',
         'description',
+        'description_ar',
         'content',
+        'content_ar',
         'cover_path',
         'duration_minutes',
         'media_path',
@@ -48,10 +59,211 @@ class Course extends Model
     public static function categoryLabels(): array
     {
         return [
-            'priority_rules' => 'Priority rules',
-            'traffic_signs' => 'Traffic signs',
-            'driving_safety' => 'Driving safety',
-            'vehicle_basics' => 'Vehicle basics',
+            'priority_rules' => __('ui.classroom.categories.priority_rules'),
+            'traffic_signs' => __('ui.classroom.categories.traffic_signs'),
+            'driving_safety' => __('ui.classroom.categories.driving_safety'),
+            'vehicle_basics' => __('ui.classroom.categories.vehicle_basics'),
         ];
+    }
+
+    public function resources(): HasMany
+    {
+        return $this->hasMany(CourseResource::class)->orderBy('sort_order')->orderBy('created_at');
+    }
+
+    public function titleForLocale(?string $locale = null): ?string
+    {
+        $locale ??= app()->getLocale();
+
+        if ($locale === 'ar') {
+            return $this->title_ar;
+        }
+
+        return $this->title;
+    }
+
+    public function descriptionForLocale(?string $locale = null): ?string
+    {
+        $locale ??= app()->getLocale();
+
+        if ($locale === 'ar') {
+            return $this->description_ar;
+        }
+
+        return $this->description;
+    }
+
+    public function contentForLocale(?string $locale = null): ?string
+    {
+        $locale ??= app()->getLocale();
+
+        if ($locale === 'ar') {
+            return $this->content_ar;
+        }
+
+        return $this->content;
+    }
+
+    public function hasArabicTranslation(): bool
+    {
+        return filled($this->title_ar)
+            || filled($this->description_ar)
+            || filled($this->content_ar);
+    }
+
+    public function mediaDisk(): ?string
+    {
+        return $this->assetDisk($this->media_path);
+    }
+
+    public function pdfDisk(): ?string
+    {
+        return $this->assetDisk($this->pdf_path);
+    }
+
+    public function mediaUrl(): ?string
+    {
+        if (! $this->media_path) {
+            return null;
+        }
+
+        return route('courses.media', $this);
+    }
+
+    public function pdfUrl(): ?string
+    {
+        if (! $this->pdf_path) {
+            return null;
+        }
+
+        return route('courses.pdf', $this);
+    }
+
+    public function deleteMediaAsset(): void
+    {
+        $this->deleteAsset($this->media_path);
+    }
+
+    public function deletePdfAsset(): void
+    {
+        $this->deleteAsset($this->pdf_path);
+    }
+
+    public function hasPersistedResources(): bool
+    {
+        return $this->resources()->exists();
+    }
+
+    /**
+     * @return Collection<int, array<string, mixed>>
+     */
+    public function resolvedResources(?string $locale = null): Collection
+    {
+        $locale ??= app()->getLocale();
+        $resources = $this->resources()->where('is_active', true)->get();
+
+        if ($resources->isNotEmpty()) {
+            return $resources->map(fn (CourseResource $resource) => $resource->toResolvedArray($locale))->values();
+        }
+
+        return $this->legacyResolvedResources($locale);
+    }
+
+    /**
+     * @return Collection<int, array<string, mixed>>
+     */
+    public function legacyResolvedResources(?string $locale = null): Collection
+    {
+        $locale ??= app()->getLocale();
+        $legacyResources = collect();
+
+        if ($this->media_path) {
+            $legacyResources->push($this->makeLegacyResource(
+                key: 'legacy-media',
+                type: Str::startsWith((string) $this->media_mime, 'video/') ? CourseResource::TYPE_VIDEO : CourseResource::TYPE_NOTE,
+                title: $this->title.' · '.__('ui.classroom.media'),
+                titleAr: filled($this->title_ar) ? $this->title_ar.' · '.__('ui.classroom.media') : null,
+                filePath: $this->media_path,
+                fileMime: $this->media_mime,
+                sortOrder: 1,
+                locale: $locale,
+            ));
+        }
+
+        if ($this->pdf_path) {
+            $legacyResources->push($this->makeLegacyResource(
+                key: 'legacy-pdf',
+                type: CourseResource::TYPE_PDF,
+                title: $this->title.' · PDF',
+                titleAr: filled($this->title_ar) ? $this->title_ar.' · PDF' : null,
+                filePath: $this->pdf_path,
+                fileMime: 'application/pdf',
+                sortOrder: 2,
+                locale: $locale,
+            ));
+        }
+
+        return $legacyResources
+            ->sortBy(['sort_order', 'created_at'])
+            ->values();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function makeLegacyResource(
+        string $key,
+        string $type,
+        string $title,
+        ?string $titleAr,
+        ?string $filePath,
+        ?string $fileMime,
+        int $sortOrder,
+        ?string $locale = null,
+    ): array {
+        $resource = new CourseResource([
+            'resource_type' => $type,
+            'title' => $title,
+            'title_ar' => $titleAr,
+            'file_path' => $filePath,
+            'file_mime' => $fileMime,
+            'sort_order' => $sortOrder,
+            'is_active' => true,
+        ]);
+
+        $resource->created_at = $this->created_at;
+        $resource->setAttribute('legacy_key', $key);
+
+        return $resource->toResolvedArray($locale);
+    }
+
+    private function deleteAsset(?string $path): void
+    {
+        $disk = $this->assetDisk($path);
+
+        if ($disk && $path) {
+            Storage::disk($disk)->delete($path);
+        }
+    }
+
+    private function assetDisk(?string $path): ?string
+    {
+        if (blank($path)) {
+            return null;
+        }
+
+        if (Storage::disk('local')->exists($path)) {
+            return 'local';
+        }
+
+        if (Storage::disk('public')->exists($path)) {
+            return 'public';
+        }
+
+        if (Str::startsWith($path, 'courses/protected/')) {
+            return 'local';
+        }
+
+        return 'public';
     }
 }

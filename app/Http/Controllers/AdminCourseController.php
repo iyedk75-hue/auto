@@ -16,6 +16,7 @@ class AdminCourseController extends Controller
     {
         return view('admin.courses.index', [
             'courses' => Course::query()
+                ->withCount('resources')
                 ->orderBy('sort_order')
                 ->orderByDesc('created_at')
                 ->paginate(12),
@@ -38,7 +39,7 @@ class AdminCourseController extends Controller
         $mediaPath = null;
         $mediaMime = null;
         if ($request->hasFile('media')) {
-            $mediaPath = $request->file('media')->store('courses/media', 'public');
+            $mediaPath = $request->file('media')->store(Course::PROTECTED_MEDIA_DIRECTORY, 'local');
             $mediaMime = $request->file('media')->getMimeType();
         }
 
@@ -49,15 +50,18 @@ class AdminCourseController extends Controller
 
         $pdfPath = null;
         if ($request->hasFile('pdf')) {
-            $pdfPath = $request->file('pdf')->store('courses/pdf', 'public');
+            $pdfPath = $request->file('pdf')->store(Course::PROTECTED_PDF_DIRECTORY, 'local');
         }
 
         Course::create([
             'id' => (string) Str::uuid(),
             'category' => $validated['category'],
             'title' => $validated['title'],
+            'title_ar' => $validated['title_ar'] ?? null,
             'description' => $validated['description'] ?? null,
+            'description_ar' => $validated['description_ar'] ?? null,
             'content' => $validated['content'] ?? null,
+            'content_ar' => $validated['content_ar'] ?? null,
             'cover_path' => $coverPath,
             'duration_minutes' => $validated['duration_minutes'] ?? null,
             'media_path' => $mediaPath,
@@ -69,7 +73,7 @@ class AdminCourseController extends Controller
 
         return redirect()
             ->route('admin.courses.index')
-            ->with('status', 'Cours ajouté avec succès.');
+            ->with('status', __('ui.admin_courses.created'));
     }
 
     public function edit(Course $course): View
@@ -87,10 +91,8 @@ class AdminCourseController extends Controller
         $mediaPath = $course->media_path;
         $mediaMime = $course->media_mime;
         if ($request->hasFile('media')) {
-            if ($course->media_path) {
-                Storage::disk('public')->delete($course->media_path);
-            }
-            $mediaPath = $request->file('media')->store('courses/media', 'public');
+            $course->deleteMediaAsset();
+            $mediaPath = $request->file('media')->store(Course::PROTECTED_MEDIA_DIRECTORY, 'local');
             $mediaMime = $request->file('media')->getMimeType();
         }
 
@@ -104,17 +106,18 @@ class AdminCourseController extends Controller
 
         $pdfPath = $course->pdf_path;
         if ($request->hasFile('pdf')) {
-            if ($course->pdf_path) {
-                Storage::disk('public')->delete($course->pdf_path);
-            }
-            $pdfPath = $request->file('pdf')->store('courses/pdf', 'public');
+            $course->deletePdfAsset();
+            $pdfPath = $request->file('pdf')->store(Course::PROTECTED_PDF_DIRECTORY, 'local');
         }
 
         $course->update([
             'category' => $validated['category'],
             'title' => $validated['title'],
+            'title_ar' => $validated['title_ar'] ?? null,
             'description' => $validated['description'] ?? null,
+            'description_ar' => $validated['description_ar'] ?? null,
             'content' => $validated['content'] ?? null,
+            'content_ar' => $validated['content_ar'] ?? null,
             'cover_path' => $coverPath,
             'duration_minutes' => $validated['duration_minutes'] ?? null,
             'media_path' => $mediaPath,
@@ -126,25 +129,35 @@ class AdminCourseController extends Controller
 
         return redirect()
             ->route('admin.courses.index')
-            ->with('status', 'Cours mis à jour avec succès.');
+            ->with('status', __('ui.admin_courses.updated'));
     }
 
     public function destroy(Course $course): RedirectResponse
     {
+        $course->deleteMediaAsset();
+        $course->deletePdfAsset();
+
+        if ($course->cover_path) {
+            Storage::disk('public')->delete($course->cover_path);
+        }
+
         $course->delete();
 
         return redirect()
             ->route('admin.courses.index')
-            ->with('status', 'Cours supprimé.');
+            ->with('status', __('ui.admin_courses.deleted'));
     }
 
     private function validateCourse(Request $request): array
     {
         return $request->validate([
             'title' => ['required', 'string', 'max:255'],
+            'title_ar' => ['nullable', 'string', 'max:255'],
             'category' => ['required', Rule::in(Course::CATEGORIES)],
             'description' => ['nullable', 'string'],
+            'description_ar' => ['nullable', 'string'],
             'content' => ['nullable', 'string'],
+            'content_ar' => ['nullable', 'string'],
             'duration_minutes' => ['nullable', 'integer', 'min:1'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'cover' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:10240'],

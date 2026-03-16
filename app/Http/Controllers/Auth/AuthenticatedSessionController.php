@@ -43,7 +43,7 @@ class AuthenticatedSessionController extends Controller
             Auth::guard('web')->logout();
 
             throw ValidationException::withMessages([
-                'email' => 'Utilisez la page auto-école pour les comptes administrateurs.',
+                'email' => __('ui.auth.errors.use_driving_school_login'),
             ]);
         }
 
@@ -64,7 +64,7 @@ class AuthenticatedSessionController extends Controller
             Auth::guard('web')->logout();
 
             throw ValidationException::withMessages([
-                'email' => 'Cette connexion est réservée aux comptes auto-école.',
+                'email' => __('ui.auth.errors.driving_school_only'),
             ]);
         }
 
