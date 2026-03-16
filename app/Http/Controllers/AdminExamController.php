@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class AdminExamController extends Controller
@@ -64,7 +65,7 @@ class AdminExamController extends Controller
 
     public function update(Request $request, ExamSchedule $exam): RedirectResponse
     {
-        $validated = $this->validateExam($request);
+        $validated = $this->validateExam($request, $exam);
 
         $exam->update($validated);
 
@@ -82,7 +83,7 @@ class AdminExamController extends Controller
             ->with('status', 'Examen supprimé.');
     }
 
-    private function validateExam(Request $request): array
+    private function validateExam(Request $request, ?ExamSchedule $exam = null): array
     {
         $validated = $request->validate([
             'user_id' => [
@@ -94,6 +95,22 @@ class AdminExamController extends Controller
             'status' => ['required', Rule::in(ExamSchedule::statuses())],
             'note' => ['nullable', 'string', 'max:255'],
         ]);
+
+        $activeStatuses = [ExamSchedule::STATUS_PLANNED];
+        $isActiveStatus = in_array($validated['status'], $activeStatuses, true);
+        if ($isActiveStatus) {
+            $hasActiveExam = ExamSchedule::query()
+                ->where('user_id', $validated['user_id'])
+                ->whereIn('status', $activeStatuses)
+                ->when($exam, fn ($query) => $query->whereKeyNot($exam->id))
+                ->exists();
+
+            if ($hasActiveExam) {
+                throw ValidationException::withMessages([
+                    'user_id' => 'Ce candidat a déjà un examen planifié.',
+                ]);
+            }
+        }
 
         if (empty($validated['auto_school_id'])) {
             $validated['auto_school_id'] = User::query()

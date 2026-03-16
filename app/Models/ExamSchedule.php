@@ -29,7 +29,7 @@ class ExamSchedule extends Model
 
     public static function statuses(): array
     {
-        return [self::STATUS_PLANNED, self::STATUS_PASSED, self::STATUS_FAILED, self::STATUS_POSTPONED];
+        return [self::STATUS_PLANNED];
     }
 
     public function user(): BelongsTo

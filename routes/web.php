@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminCourseController;
+use App\Http\Controllers\AdminCandidateController;
 use App\Http\Controllers\AdminExamController;
 use App\Http\Controllers\AdminPaymentController;
 use App\Http\Controllers\AdminQuestionController;
@@ -61,7 +62,7 @@ Route::middleware(['auth', 'verified', 'admin'])
     ->name('admin.')
     ->group(function (): void {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-        Route::get('/candidates', [AdminController::class, 'candidates'])->name('candidates.index');
+        Route::resource('/candidates', AdminCandidateController::class)->except(['create', 'store']);
         Route::resource('/courses', AdminCourseController::class)->except('show');
         Route::resource('/courses.resources', AdminCourseResourceController::class)->except('show');
         Route::resource('/payments', AdminPaymentController::class)->except('show');

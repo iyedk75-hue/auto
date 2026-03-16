@@ -30,17 +30,5 @@ class AdminController extends Controller
         ]);
     }
 
-    public function candidates(): View
-    {
-        return view('admin.candidates.index', [
-            'candidates' => User::query()
-                ->where('role', User::ROLE_CANDIDATE)
-                ->with('autoSchool')
-                ->withCount(['payments', 'quizSessions', 'exams'])
-                ->latest()
-                ->paginate(12),
-        ]);
-    }
-
     //
 }

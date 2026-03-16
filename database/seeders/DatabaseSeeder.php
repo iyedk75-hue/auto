@@ -11,6 +11,7 @@ use App\Models\QuestionOption;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
+use Database\Seeders\CandidateSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -160,5 +161,7 @@ class DatabaseSeeder extends Seeder
             'status' => ExamSchedule::STATUS_PLANNED,
             'note' => 'Session matinée.',
         ]);
+
+        $this->call(CandidateSeeder::class);
     }
 }

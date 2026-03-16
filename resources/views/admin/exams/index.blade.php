@@ -13,13 +13,6 @@
     </x-slot>
 
     @php
-        $statusLabels = [
-            'planned' => 'Planifié',
-            'passed' => 'Réussi',
-            'failed' => 'Échoué',
-            'postponed' => 'Reporté',
-        ];
-
         $today = now();
         $monthStart = $today->copy()->startOfMonth();
         $daysInMonth = $monthStart->daysInMonth;
@@ -158,9 +151,7 @@
                                             <p class="text-xs text-slate-500">{{ $exam->autoSchool?->name ?? 'Auto-école' }}</p>
                                             <p class="text-xs text-slate-400">{{ $exam->note ?? 'Session programmée' }}</p>
                                         </div>
-                                        <span class="status-pill status-pill-{{ $exam->status === 'passed' ? 'emerald' : ($exam->status === 'failed' ? 'rose' : 'amber') }}">
-                                            {{ $statusLabels[$exam->status] ?? ucfirst($exam->status) }}
-                                        </span>
+                                        <span class="status-pill status-pill-slate">Planifié</span>
                                     </div>
                                     <div class="mt-4 flex flex-wrap gap-2">
                                         <a href="{{ route('admin.exams.edit', $exam) }}" class="btn-ghost">Modifier</a>
@@ -175,60 +166,6 @@
                         @endforeach
                         <div class="timeline-empty space-y-3" x-show="!examsByDate[selectedDate]" x-cloak>
                             <p>Aucun examen pour cette date.</p>
-                            <a href="#all-exams" class="btn-ghost w-full justify-center">Voir tous les examens</a>
-                        </div>
-                    </div>
-
-                    <div class="mt-6">
-                        {{ $exams->links() }}
-                    </div>
-
-                    <div id="all-exams" class="mt-10">
-                        <div class="flex flex-wrap items-center justify-between gap-4">
-                            <div>
-                                <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">Tous les examens</p>
-                                <h4 class="text-2xl font-extrabold text-slate-900">Liste complète</h4>
-                            </div>
-                            <a href="{{ route('admin.exams.index') }}" class="btn-ghost">Rafraîchir</a>
-                        </div>
-
-                        <div class="agenda-list mt-6">
-                            @forelse ($exams as $exam)
-                                <article class="agenda-item">
-                                    <div class="agenda-date">
-                                        <span class="agenda-day">{{ $exam->exam_date->format('d') }}</span>
-                                        <span class="agenda-month">{{ $exam->exam_date->format('M') }}</span>
-                                        <span class="agenda-year">{{ $exam->exam_date->format('Y') }}</span>
-                                    </div>
-                                    <div class="agenda-card">
-                                        <div class="agenda-header">
-                                            <div>
-                                                <p class="text-sm font-semibold text-slate-900">{{ $exam->user->name }}</p>
-                                                <p class="text-xs text-slate-500">{{ $exam->user->email }}</p>
-                                            </div>
-                                            <span class="status-pill status-pill-{{ $exam->status === 'passed' ? 'emerald' : ($exam->status === 'failed' ? 'rose' : 'amber') }}">
-                                                {{ $statusLabels[$exam->status] ?? ucfirst($exam->status) }}
-                                            </span>
-                                        </div>
-                                        <div class="agenda-meta">
-                                            <p>{{ $exam->autoSchool?->name ?? 'Auto-école' }}</p>
-                                            <p class="text-slate-400">{{ $exam->note ?? 'Session programmée' }}</p>
-                                        </div>
-                                        <div class="agenda-actions">
-                                            <a href="{{ route('admin.exams.edit', $exam) }}" class="btn-ghost">Modifier</a>
-                                            <form method="POST" action="{{ route('admin.exams.destroy', $exam) }}">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn-danger">Supprimer</button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </article>
-                            @empty
-                                <div class="rounded-[2rem] border border-dashed border-slate-300 bg-white/70 p-10 text-sm text-slate-500">
-                                    Aucun examen planifié.
-                                </div>
-                            @endforelse
                         </div>
                     </div>
                 </section>

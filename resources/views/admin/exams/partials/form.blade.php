@@ -35,7 +35,7 @@
             <select name="status" class="form-input-auth">
                 @foreach (\App\Models\ExamSchedule::statuses() as $status)
                     <option value="{{ $status }}" @selected(old('status', $exam->status ?? 'planned') === $status)>
-                        {{ $status === 'passed' ? 'Réussi' : ($status === 'failed' ? 'Échoué' : ($status === 'postponed' ? 'Reporté' : 'Planifié')) }}
+                        Planifié
                     </option>
                 @endforeach
             </select>
