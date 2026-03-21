@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\InteractsWithAdminScope;
 use App\Models\AutoSchool;
 use App\Models\ExamSchedule;
 use App\Models\User;
+use App\Notifications\ExamScheduleUpdatedNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -13,77 +15,94 @@ use Illuminate\View\View;
 
 class AdminExamController extends Controller
 {
-    public function index(): View
+    use InteractsWithAdminScope;
+
+    public function index(Request $request): View
     {
+        $admin = $this->adminUser($request);
+
         return view('admin.exams.index', [
-            'exams' => ExamSchedule::query()
+            'exams' => $this->examQueryForAdmin($admin)
                 ->with(['user', 'autoSchool'])
                 ->orderBy('exam_date')
                 ->paginate(12),
-            'candidates' => User::query()
-                ->where('role', User::ROLE_CANDIDATE)
+            'candidates' => $this->candidateQueryForAdmin($admin)
                 ->orderBy('name')
                 ->get(),
-            'schools' => AutoSchool::query()->orderBy('name')->get(),
+            'schools' => $this->availableSchoolsForAdmin($admin),
+            'canChooseSchool' => ! $this->shouldScopeToSchool($admin),
         ]);
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
+        $admin = $this->adminUser($request);
+
         return view('admin.exams.create', [
             'exam' => new ExamSchedule(),
-            'candidates' => User::query()
-                ->where('role', User::ROLE_CANDIDATE)
+            'candidates' => $this->candidateQueryForAdmin($admin)
                 ->orderBy('name')
                 ->get(),
-            'schools' => AutoSchool::query()->orderBy('name')->get(),
+            'schools' => $this->availableSchoolsForAdmin($admin),
+            'canChooseSchool' => ! $this->shouldScopeToSchool($admin),
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $this->validateExam($request);
+        $validated = $this->validateExam($request, $this->adminUser($request));
 
-        ExamSchedule::create($validated);
+        $exam = ExamSchedule::create($validated);
+        $exam->load(['user', 'autoSchool']);
+        $exam->user?->notify(new ExamScheduleUpdatedNotification($exam, 'created'));
 
         return redirect()
             ->route('admin.exams.index')
-            ->with('status', 'Examen planifié avec succès.');
+            ->with('status', 'تمت برمجة الامتحان بنجاح.');
     }
 
-    public function edit(ExamSchedule $exam): View
+    public function edit(Request $request, ExamSchedule $exam): View
     {
+        $admin = $this->adminUser($request);
+        $this->ensureManagedExam($admin, $exam);
+
         return view('admin.exams.edit', [
             'exam' => $exam,
-            'candidates' => User::query()
-                ->where('role', User::ROLE_CANDIDATE)
+            'candidates' => $this->candidateQueryForAdmin($admin)
                 ->orderBy('name')
                 ->get(),
-            'schools' => AutoSchool::query()->orderBy('name')->get(),
+            'schools' => $this->availableSchoolsForAdmin($admin),
+            'canChooseSchool' => ! $this->shouldScopeToSchool($admin),
         ]);
     }
 
     public function update(Request $request, ExamSchedule $exam): RedirectResponse
     {
-        $validated = $this->validateExam($request, $exam);
+        $admin = $this->adminUser($request);
+        $this->ensureManagedExam($admin, $exam);
+        $validated = $this->validateExam($request, $admin, $exam);
 
         $exam->update($validated);
+        $exam->load(['user', 'autoSchool']);
+        $exam->user?->notify(new ExamScheduleUpdatedNotification($exam, 'updated'));
 
         return redirect()
             ->route('admin.exams.index')
-            ->with('status', 'Examen mis à jour.');
+            ->with('status', 'تم تحديث الامتحان.');
     }
 
-    public function destroy(ExamSchedule $exam): RedirectResponse
+    public function destroy(Request $request, ExamSchedule $exam): RedirectResponse
     {
+        $this->ensureManagedExam($this->adminUser($request), $exam);
+
         $exam->delete();
 
         return redirect()
             ->route('admin.exams.index')
-            ->with('status', 'Examen supprimé.');
+            ->with('status', 'تم حذف الامتحان.');
     }
 
-    private function validateExam(Request $request, ?ExamSchedule $exam = null): array
+    private function validateExam(Request $request, User $admin, ?ExamSchedule $exam = null): array
     {
         $validated = $request->validate([
             'user_id' => [
@@ -96,6 +115,16 @@ class AdminExamController extends Controller
             'note' => ['nullable', 'string', 'max:255'],
         ]);
 
+        $candidate = $this->candidateQueryForAdmin($admin)
+            ->whereKey($validated['user_id'])
+            ->first();
+
+        if (! $candidate) {
+            throw ValidationException::withMessages([
+                'user_id' => 'هذا المترشح غير متاح من داخل مساحة الإدارة الخاصة بك.',
+            ]);
+        }
+
         $activeStatuses = [ExamSchedule::STATUS_PLANNED];
         $isActiveStatus = in_array($validated['status'], $activeStatuses, true);
         if ($isActiveStatus) {
@@ -107,15 +136,21 @@ class AdminExamController extends Controller
 
             if ($hasActiveExam) {
                 throw ValidationException::withMessages([
-                    'user_id' => 'Ce candidat a déjà un examen planifié.',
+                    'user_id' => 'لدى هذا المترشح امتحان مبرمج بالفعل.',
                 ]);
             }
         }
 
-        if (empty($validated['auto_school_id'])) {
-            $validated['auto_school_id'] = User::query()
-                ->where('id', $validated['user_id'])
-                ->value('auto_school_id');
+        if ($this->shouldScopeToSchool($admin)) {
+            $validated['auto_school_id'] = $this->managedSchoolId($admin);
+        } elseif (! empty($candidate->auto_school_id)) {
+            if (! empty($validated['auto_school_id']) && (int) $validated['auto_school_id'] !== (int) $candidate->auto_school_id) {
+                throw ValidationException::withMessages([
+                    'auto_school_id' => 'يجب أن تتطابق مدرسة السياقة المحددة مع مدرسة المترشح.',
+                ]);
+            }
+
+            $validated['auto_school_id'] = $candidate->auto_school_id;
         }
 
         return $validated;

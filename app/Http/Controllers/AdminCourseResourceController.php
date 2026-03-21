@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\InteractsWithAdminScope;
 use App\Models\Course;
 use App\Models\CourseResource;
 use Illuminate\Http\RedirectResponse;
@@ -12,8 +13,12 @@ use Illuminate\View\View;
 
 class AdminCourseResourceController extends Controller
 {
+    use InteractsWithAdminScope;
+
     public function index(Course $course): View
     {
+        $this->ensureManagedCourse(request()->user(), $course);
+
         return view('admin.course-resources.index', [
             'course' => $course,
             'resources' => $course->resources()->get(),
@@ -22,6 +27,8 @@ class AdminCourseResourceController extends Controller
 
     public function create(Course $course): View
     {
+        $this->ensureManagedCourse(request()->user(), $course);
+
         return view('admin.course-resources.create', [
             'course' => $course,
             'resource' => new CourseResource(),
@@ -31,6 +38,7 @@ class AdminCourseResourceController extends Controller
 
     public function store(Request $request, Course $course): RedirectResponse
     {
+        $this->ensureManagedCourse($request->user(), $course);
         $validated = $this->validateResource($request, true);
 
         $course->resources()->create([
@@ -48,11 +56,12 @@ class AdminCourseResourceController extends Controller
 
         return redirect()
             ->route('admin.courses.resources.index', $course)
-            ->with('status', 'Resource added.');
+            ->with('status', 'تمت إضافة المورد بنجاح.');
     }
 
     public function edit(Course $course, CourseResource $resource): View
     {
+        $this->ensureManagedCourse(request()->user(), $course);
         abort_unless($resource->course_id === $course->id, 404);
 
         return view('admin.course-resources.edit', [
@@ -64,9 +73,10 @@ class AdminCourseResourceController extends Controller
 
     public function update(Request $request, Course $course, CourseResource $resource): RedirectResponse
     {
+        $this->ensureManagedCourse($request->user(), $course);
         abort_unless($resource->course_id === $course->id, 404);
 
-        $validated = $this->validateResource($request, false);
+        $validated = $this->validateResource($request, false, $resource);
         $previousType = $resource->resource_type;
         $nextType = $validated['resource_type'];
         $filePath = $resource->file_path;
@@ -103,11 +113,12 @@ class AdminCourseResourceController extends Controller
 
         return redirect()
             ->route('admin.courses.resources.index', $course)
-            ->with('status', 'Resource updated.');
+            ->with('status', 'تم تحديث المورد بنجاح.');
     }
 
     public function destroy(Course $course, CourseResource $resource): RedirectResponse
     {
+        $this->ensureManagedCourse(request()->user(), $course);
         abort_unless($resource->course_id === $course->id, 404);
 
         $resource->deleteFileAsset();
@@ -115,10 +126,10 @@ class AdminCourseResourceController extends Controller
 
         return redirect()
             ->route('admin.courses.resources.index', $course)
-            ->with('status', 'Resource deleted.');
+            ->with('status', 'تم حذف المورد.');
     }
 
-    private function validateResource(Request $request, bool $isCreate): array
+    private function validateResource(Request $request, bool $isCreate, ?CourseResource $resource = null): array
     {
         $baseRules = [
             'resource_type' => ['required', Rule::in(CourseResource::TYPES)],
@@ -136,21 +147,20 @@ class AdminCourseResourceController extends Controller
             $baseRules['note_body'][] = 'required';
         }
 
-        if ($type === CourseResource::TYPE_VIDEO) {
-            $baseRules['resource_file'] = array_filter([
-                $isCreate ? 'required' : 'nullable',
-                'file',
-                'mimes:mp4,webm',
-                'max:51200',
-            ]);
-        }
+        if ($type === CourseResource::TYPE_AUDIO) {
+            $requiresFile = $isCreate;
 
-        if ($type === CourseResource::TYPE_PDF) {
+            if (! $isCreate && $resource) {
+                $sameType = $resource->resource_type === $type;
+                $hasExistingFile = filled($resource->file_path);
+                $requiresFile = ! $sameType || ! $hasExistingFile;
+            }
+
             $baseRules['resource_file'] = array_filter([
-                $isCreate ? 'required' : 'nullable',
+                $requiresFile ? 'required' : 'nullable',
                 'file',
-                'mimes:pdf',
-                'max:20480',
+                'mimes:mp3,wav,ogg,m4a,aac',
+                'max:51200',
             ]);
         }
 
@@ -164,8 +174,7 @@ class AdminCourseResourceController extends Controller
         }
 
         return match ($type) {
-            CourseResource::TYPE_VIDEO => $request->file('resource_file')->store(CourseResource::PROTECTED_VIDEO_DIRECTORY, 'local'),
-            CourseResource::TYPE_PDF => $request->file('resource_file')->store(CourseResource::PROTECTED_PDF_DIRECTORY, 'local'),
+            CourseResource::TYPE_AUDIO => $request->file('resource_file')->store(CourseResource::PROTECTED_AUDIO_DIRECTORY, 'local'),
             default => null,
         };
     }
@@ -177,8 +186,15 @@ class AdminCourseResourceController extends Controller
         }
 
         return match ($type) {
-            CourseResource::TYPE_VIDEO, CourseResource::TYPE_PDF => $request->file('resource_file')->getMimeType(),
+            CourseResource::TYPE_AUDIO => $request->file('resource_file')->getMimeType(),
             default => null,
         };
+    }
+
+    private function ensureManagedCourse($admin, Course $course): void
+    {
+        if ($this->shouldScopeToSchool($admin)) {
+            abort_unless((int) $course->auto_school_id === $this->managedSchoolId($admin), 403);
+        }
     }
 }

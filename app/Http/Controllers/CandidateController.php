@@ -19,12 +19,18 @@ class CandidateController extends Controller
 
         $nextExam = ExamSchedule::query()
             ->where('user_id', $user->id)
+            ->where('status', ExamSchedule::STATUS_PLANNED)
+            ->whereDate('exam_date', '>=', now()->toDateString())
             ->orderBy('exam_date')
             ->first();
 
         $latestPayments = $user->payments()->latest()->take(5)->get();
         $lastQuiz = $user->quizSessions()->latest()->first();
-        $hasQuestions = Question::query()->where('is_active', true)->exists();
+        $hasQuestions = Question::query()
+            ->where('is_active', true)
+            ->when($user->auto_school_id, fn ($query) => $query->where('auto_school_id', $user->auto_school_id))
+            ->exists();
+        $notifications = $user->notifications()->latest()->take(5)->get();
 
         return view('candidate.dashboard', [
             'user' => $user,
@@ -32,6 +38,8 @@ class CandidateController extends Controller
             'latestPayments' => $latestPayments,
             'lastQuiz' => $lastQuiz,
             'hasQuestions' => $hasQuestions,
+            'canAccessLearning' => $user->hasLearningAccess(),
+            'notifications' => $notifications,
         ]);
     }
 }

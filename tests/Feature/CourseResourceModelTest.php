@@ -27,39 +27,28 @@ class CourseResourceModelTest extends TestCase
             ],
             [
                 'id' => (string) Str::uuid(),
-                'resource_type' => CourseResource::TYPE_VIDEO,
-                'title' => 'Vidéo 1',
-                'file_path' => 'courses/protected/media/video-1.mp4',
-                'file_mime' => 'video/mp4',
+                'resource_type' => CourseResource::TYPE_AUDIO,
+                'title' => 'Audio 1',
+                'file_path' => 'courses/protected/resources/audio/audio-1.mp3',
+                'file_mime' => 'audio/mpeg',
                 'sort_order' => 1,
-                'is_active' => true,
-            ],
-            [
-                'id' => (string) Str::uuid(),
-                'resource_type' => CourseResource::TYPE_PDF,
-                'title' => 'Fiche PDF',
-                'file_path' => 'courses/protected/pdf/chapter-1.pdf',
-                'file_mime' => 'application/pdf',
-                'sort_order' => 3,
                 'is_active' => true,
             ],
         ]);
 
         $resources = $course->resources()->get();
 
-        $this->assertCount(3, $resources);
+        $this->assertCount(2, $resources);
         $this->assertSame([
-            CourseResource::TYPE_VIDEO,
+            CourseResource::TYPE_AUDIO,
             CourseResource::TYPE_NOTE,
-            CourseResource::TYPE_PDF,
         ], $resources->pluck('resource_type')->all());
     }
 
-    public function test_resource_model_supports_video_pdf_and_note_types(): void
+    public function test_resource_model_supports_audio_and_note_types(): void
     {
         $this->assertSame([
-            'video',
-            'pdf',
+            'audio',
             'note',
         ], CourseResource::TYPES);
     }
@@ -68,12 +57,12 @@ class CourseResourceModelTest extends TestCase
     {
         $course = $this->makeCourse();
 
-        $video = $course->resources()->create([
+        $audio = $course->resources()->create([
             'id' => (string) Str::uuid(),
-            'resource_type' => CourseResource::TYPE_VIDEO,
-            'title' => 'Vidéo 1',
-            'file_path' => 'courses/protected/media/video-1.mp4',
-            'file_mime' => 'video/mp4',
+            'resource_type' => CourseResource::TYPE_AUDIO,
+            'title' => 'Audio 1',
+            'file_path' => 'courses/protected/resources/audio/audio-1.mp3',
+            'file_mime' => 'audio/mpeg',
             'sort_order' => 1,
             'is_active' => true,
         ]);
@@ -87,19 +76,9 @@ class CourseResourceModelTest extends TestCase
             'is_active' => true,
         ]);
 
-        $pdf = $course->resources()->create([
-            'id' => (string) Str::uuid(),
-            'resource_type' => CourseResource::TYPE_PDF,
-            'title' => 'PDF 1',
-            'file_path' => 'courses/protected/pdf/pdf-1.pdf',
-            'file_mime' => 'application/pdf',
-            'sort_order' => 3,
-            'is_active' => true,
-        ]);
-
-        $this->assertTrue($video->isVideo());
+        $this->assertTrue($audio->isAudio());
         $this->assertTrue($note->isNote());
-        $this->assertTrue($pdf->isPdf());
+        $this->assertTrue($audio->isFileResource());
     }
 
     private function makeCourse(): Course

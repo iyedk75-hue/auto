@@ -15,7 +15,9 @@ class CandidateCourseController extends Controller
 {
     public function index(): View|RedirectResponse
     {
-        if (auth()->user()?->isAdmin()) {
+        $user = auth()->user();
+
+        if ($user?->isAdmin()) {
             return redirect()->route('admin.dashboard');
         }
 
@@ -24,6 +26,7 @@ class CandidateCourseController extends Controller
         return view('candidate.courses.index', [
             'courses' => Course::query()
                 ->where('is_active', true)
+                ->when($user?->auto_school_id, fn ($query) => $query->where('auto_school_id', $user->auto_school_id))
                 ->orderBy('sort_order')
                 ->paginate(12),
             'categoryLabels' => Course::categoryLabels(),
@@ -38,6 +41,10 @@ class CandidateCourseController extends Controller
         }
 
         if (! $course->is_active) {
+            abort(404);
+        }
+
+        if ($request->user()?->auto_school_id && (int) $course->auto_school_id !== (int) $request->user()->auto_school_id) {
             abort(404);
         }
 
@@ -77,24 +84,17 @@ class CandidateCourseController extends Controller
         ]);
     }
 
-    public function media(Course $course, Request $request): BinaryFileResponse|RedirectResponse
+    public function audio(Course $course, Request $request): BinaryFileResponse|RedirectResponse
     {
-        [$disk, $path] = $this->resolveProtectedAsset($course, $course->media_path, $course->mediaDisk(), $request);
+        [$disk, $path] = $this->resolveProtectedAsset($course, $course->audio_path, $course->audioDisk(), $request);
+        abort_unless($course->hasAudioMedia(), 404);
+
+        $mime = $course->audio_mime
+            ?: Storage::disk($disk)->mimeType($path)
+            ?: 'audio/mpeg';
 
         return response()->file(Storage::disk($disk)->path($path), [
-            'Content-Type' => $course->media_mime ?? 'application/octet-stream',
-            'Content-Disposition' => 'inline; filename="'.basename($path).'"',
-            'Cache-Control' => 'private, no-store, max-age=0',
-            'X-Robots-Tag' => 'noindex, nofollow',
-        ]);
-    }
-
-    public function pdf(Course $course, Request $request): BinaryFileResponse|RedirectResponse
-    {
-        [$disk, $path] = $this->resolveProtectedAsset($course, $course->pdf_path, $course->pdfDisk(), $request);
-
-        return response()->file(Storage::disk($disk)->path($path), [
-            'Content-Type' => 'application/pdf',
+            'Content-Type' => $mime,
             'Content-Disposition' => 'inline; filename="'.basename($path).'"',
             'Cache-Control' => 'private, no-store, max-age=0',
             'X-Robots-Tag' => 'noindex, nofollow',
@@ -104,9 +104,13 @@ class CandidateCourseController extends Controller
     public function resourceFile(Course $course, CourseResource $resource, Request $request): BinaryFileResponse|RedirectResponse
     {
         abort_unless($resource->course_id === $course->id, 404);
-        abort_unless($resource->isFileResource(), 404);
+        abort_unless($resource->isAudio(), 404);
 
         [$disk, $path, $mime] = $this->resolveProtectedResourceAsset($course, $resource, $request);
+        if ($mime === 'application/octet-stream') {
+            $mime = Storage::disk($disk)->mimeType($path)
+                ?: 'audio/mpeg';
+        }
 
         return response()->file(Storage::disk($disk)->path($path), [
             'Content-Type' => $mime,
@@ -141,17 +145,26 @@ class CandidateCourseController extends Controller
         $viewerKind = $this->viewerKindForResource($resource);
         $typeLabel = $this->typeLabelForResource($resource, $viewerKind);
         $dateLabel = $resource['created_at']?->locale($locale)->translatedFormat('d M Y');
+        $resourceMime = $resource['file_mime'] ?? null;
+        if (! $resourceMime) {
+            $resourceMime = match ($resource['type'] ?? null) {
+                CourseResource::TYPE_AUDIO => 'audio/mpeg',
+                default => null,
+            };
+        }
 
         return array_merge($resource, [
             'viewer_kind' => $viewerKind,
             'viewer_url' => $this->viewerUrlForResource($course, $resource, $viewerKind),
+            'viewer_storage_key' => $this->viewerStorageKeyForResource($course, $resource, $viewerKind),
             'type_label' => $typeLabel,
             'date_label' => $dateLabel,
+            'file_mime' => $resourceMime,
             'meta_label' => collect([$typeLabel, $dateLabel])->filter()->implode(' · '),
             'select_url' => route('courses.show', [
                 'course' => $course,
                 'resource' => $resource['key'],
-            ]).'#course-resource-viewer',
+            ], absolute: false).'#course-resource-viewer',
         ]);
     }
 
@@ -162,13 +175,12 @@ class CandidateCourseController extends Controller
     {
         $fileMime = (string) ($resource['file_mime'] ?? '');
 
-        if ($fileMime !== '' && str_starts_with($fileMime, 'image/')) {
-            return 'image';
+        if ($fileMime !== '' && str_starts_with($fileMime, 'audio/')) {
+            return 'audio';
         }
 
         return match ($resource['type'] ?? null) {
-            CourseResource::TYPE_VIDEO => 'video',
-            CourseResource::TYPE_PDF => 'pdf',
+            CourseResource::TYPE_AUDIO => 'audio',
             default => 'note',
         };
     }
@@ -178,13 +190,8 @@ class CandidateCourseController extends Controller
      */
     private function typeLabelForResource(array $resource, string $viewerKind): string
     {
-        if ($viewerKind === 'image') {
-            return __('ui.classroom.resource_types.media');
-        }
-
         return match ($resource['type'] ?? null) {
-            CourseResource::TYPE_VIDEO => __('ui.classroom.resource_types.video'),
-            CourseResource::TYPE_PDF => __('ui.classroom.resource_types.pdf'),
+            CourseResource::TYPE_AUDIO => __('ui.classroom.resource_types.audio'),
             default => __('ui.classroom.resource_types.note'),
         };
     }
@@ -199,15 +206,25 @@ class CandidateCourseController extends Controller
         }
 
         if (($resource['origin'] ?? null) === 'legacy') {
-            return $viewerKind === 'pdf'
-                ? route('courses.pdf', $course)
-                : route('courses.media', $course);
+            return route('courses.audio', $course, absolute: false);
         }
 
         return route('courses.resources.file', [
             'course' => $course,
             'resource' => $resource['key'],
-        ]);
+        ], absolute: false);
+    }
+
+    /**
+     * @param  array<string, mixed>  $resource
+     */
+    private function viewerStorageKeyForResource(Course $course, array $resource, string $viewerKind): ?string
+    {
+        if ($viewerKind !== 'audio') {
+            return null;
+        }
+
+        return (string) ($resource['origin'] ?? 'resource').':'.$course->getKey().':'.$resource['key'];
     }
 
     /**
@@ -221,6 +238,10 @@ class CandidateCourseController extends Controller
         abort_if(blank($path) || blank($disk), 404);
 
         if (! $user->isAdmin() && ! $course->is_active) {
+            abort(404);
+        }
+
+        if (! $user->isAdmin() && $user->auto_school_id && (int) $course->auto_school_id !== (int) $user->auto_school_id) {
             abort(404);
         }
 
@@ -243,6 +264,10 @@ class CandidateCourseController extends Controller
         abort_if(blank($path) || blank($disk), 404);
 
         if (! $user->isAdmin() && (! $course->is_active || ! $resource->is_active)) {
+            abort(404);
+        }
+
+        if (! $user->isAdmin() && $user->auto_school_id && (int) $course->auto_school_id !== (int) $user->auto_school_id) {
             abort(404);
         }
 

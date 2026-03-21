@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
@@ -20,9 +21,9 @@ class Course extends Model
 
     protected $keyType = 'string';
 
-    public const PROTECTED_MEDIA_DIRECTORY = 'courses/protected/media';
+    public const PROTECTED_AUDIO_DIRECTORY = 'courses/protected/audio';
 
-    public const PROTECTED_PDF_DIRECTORY = 'courses/protected/pdf';
+    public const AUDIO_MAX_KB = 262144;
 
     public const CATEGORIES = [
         'priority_rules',
@@ -33,6 +34,7 @@ class Course extends Model
 
     protected $fillable = [
         'id',
+        'auto_school_id',
         'category',
         'title',
         'title_ar',
@@ -42,9 +44,8 @@ class Course extends Model
         'content_ar',
         'cover_path',
         'duration_minutes',
-        'media_path',
-        'media_mime',
-        'pdf_path',
+        'audio_path',
+        'audio_mime',
         'sort_order',
         'is_active',
     ];
@@ -52,6 +53,11 @@ class Course extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    public function autoSchool(): BelongsTo
+    {
+        return $this->belongsTo(AutoSchool::class);
+    }
 
     /**
      * @return array<string, string>
@@ -66,9 +72,17 @@ class Course extends Model
         ];
     }
 
+    public static function audioMaxSizeLabel(): string
+    {
+        return (string) (self::AUDIO_MAX_KB / 1024).' MB';
+    }
+
     public function resources(): HasMany
     {
-        return $this->hasMany(CourseResource::class)->orderBy('sort_order')->orderBy('created_at');
+        return $this->hasMany(CourseResource::class)
+            ->whereIn('resource_type', CourseResource::TYPES)
+            ->orderBy('sort_order')
+            ->orderBy('created_at');
     }
 
     public function titleForLocale(?string $locale = null): ?string
@@ -111,42 +125,23 @@ class Course extends Model
             || filled($this->content_ar);
     }
 
-    public function mediaDisk(): ?string
+    public function audioDisk(): ?string
     {
-        return $this->assetDisk($this->media_path);
+        return $this->assetDisk($this->audio_path);
     }
 
-    public function pdfDisk(): ?string
+    public function audioUrl(): ?string
     {
-        return $this->assetDisk($this->pdf_path);
-    }
-
-    public function mediaUrl(): ?string
-    {
-        if (! $this->media_path) {
+        if (! $this->hasAudioMedia()) {
             return null;
         }
 
-        return route('courses.media', $this);
+        return route('courses.audio', $this);
     }
 
-    public function pdfUrl(): ?string
+    public function deleteAudioAsset(): void
     {
-        if (! $this->pdf_path) {
-            return null;
-        }
-
-        return route('courses.pdf', $this);
-    }
-
-    public function deleteMediaAsset(): void
-    {
-        $this->deleteAsset($this->media_path);
-    }
-
-    public function deletePdfAsset(): void
-    {
-        $this->deleteAsset($this->pdf_path);
+        $this->deleteAsset($this->audio_path);
     }
 
     public function hasPersistedResources(): bool
@@ -177,28 +172,15 @@ class Course extends Model
         $locale ??= app()->getLocale();
         $legacyResources = collect();
 
-        if ($this->media_path) {
+        if ($this->hasAudioMedia()) {
             $legacyResources->push($this->makeLegacyResource(
-                key: 'legacy-media',
-                type: Str::startsWith((string) $this->media_mime, 'video/') ? CourseResource::TYPE_VIDEO : CourseResource::TYPE_NOTE,
-                title: $this->title.' · '.__('ui.classroom.media'),
-                titleAr: filled($this->title_ar) ? $this->title_ar.' · '.__('ui.classroom.media') : null,
-                filePath: $this->media_path,
-                fileMime: $this->media_mime,
+                key: 'legacy-audio',
+                type: CourseResource::TYPE_AUDIO,
+                title: $this->title.' · '.__('ui.classroom.audio'),
+                titleAr: filled($this->title_ar) ? $this->title_ar.' · '.__('ui.classroom.audio') : null,
+                filePath: $this->audio_path,
+                fileMime: $this->audio_mime,
                 sortOrder: 1,
-                locale: $locale,
-            ));
-        }
-
-        if ($this->pdf_path) {
-            $legacyResources->push($this->makeLegacyResource(
-                key: 'legacy-pdf',
-                type: CourseResource::TYPE_PDF,
-                title: $this->title.' · PDF',
-                titleAr: filled($this->title_ar) ? $this->title_ar.' · PDF' : null,
-                filePath: $this->pdf_path,
-                fileMime: 'application/pdf',
-                sortOrder: 2,
                 locale: $locale,
             ));
         }
@@ -206,6 +188,21 @@ class Course extends Model
         return $legacyResources
             ->sortBy(['sort_order', 'created_at'])
             ->values();
+    }
+
+    public function hasAudioMedia(): bool
+    {
+        if (blank($this->audio_path)) {
+            return false;
+        }
+
+        $mime = (string) $this->audio_mime;
+
+        if ($mime !== '') {
+            return Str::startsWith($mime, 'audio/');
+        }
+
+        return Str::endsWith(Str::lower($this->audio_path), ['.mp3', '.wav', '.ogg', '.m4a', '.aac']);
     }
 
     /**

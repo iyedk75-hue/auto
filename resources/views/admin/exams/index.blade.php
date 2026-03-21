@@ -2,13 +2,13 @@
     <x-slot name="header">
         <div class="flex flex-wrap items-start justify-between gap-4">
             <div class="space-y-4">
-                <p class="kicker">Examens</p>
-                <h2 class="text-4xl font-extrabold tracking-tight text-slate-950">Agenda des examens</h2>
+                <p class="kicker">الامتحانات</p>
+                <h2 class="text-4xl font-extrabold tracking-tight text-slate-950">جدول الامتحانات</h2>
                 <p class="max-w-2xl text-base leading-7 text-slate-600">
-                    Planifiez les dates de passage et gardez l'historique des résultats.
+                    برمج مواعيد الامتحانات واحتفظ بسجل النتائج.
                 </p>
             </div>
-            <a href="{{ route('admin.exams.create') }}" class="btn-admin-entry">Planifier</a>
+            <a href="{{ route('admin.exams.create') }}" class="btn-admin-entry">برمجة</a>
         </div>
     </x-slot>
 
@@ -57,17 +57,17 @@
                 <aside class="agenda-panel">
                     <div class="agenda-panel-header">
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">Month</p>
+                            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">الشهر</p>
                             <h3 class="text-2xl font-extrabold text-slate-900">{{ $monthStart->format('F Y') }}</h3>
                         </div>
                         <div class="agenda-panel-actions">
-                            <button type="button" class="agenda-icon-btn agenda-icon-btn-sm" aria-label="Search">
+                            <button type="button" class="agenda-icon-btn agenda-icon-btn-sm" aria-label="بحث">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                                     <circle cx="11" cy="11" r="7" />
                                     <path d="m20 20-3.5-3.5" />
                                 </svg>
                             </button>
-                            <button type="button" class="agenda-icon-btn agenda-icon-btn-sm" aria-label="Notifications">
+                            <button type="button" class="agenda-icon-btn agenda-icon-btn-sm" aria-label="إشعارات">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M6 8a6 6 0 1 1 12 0c0 7 3 7 3 7H3s3 0 3-7" />
                                     <path d="M10 19a2 2 0 0 0 4 0" />
@@ -78,7 +78,7 @@
 
                     <div class="calendar-card">
                         <div class="calendar-weekdays">
-                            @foreach (['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as $label)
+                            @foreach (['ن', 'ث', 'ر', 'خ', 'ج', 'س', 'ح'] as $label)
                                 <span>{{ $label }}</span>
                             @endforeach
                         </div>
@@ -109,8 +109,8 @@
 
                     <div class="agenda-upcoming">
                         <div class="flex items-center justify-between">
-                            <p class="text-sm font-semibold text-slate-900">Upcoming Exams</p>
-                            <a href="{{ route('admin.exams.index') }}" class="text-xs font-semibold text-slate-400">See all</a>
+                            <p class="text-sm font-semibold text-slate-900">الامتحانات القادمة</p>
+                            <a href="{{ route('admin.exams.index') }}" class="text-xs font-semibold text-slate-400">عرض الكل</a>
                         </div>
                         <div class="mt-4 space-y-3">
                             @forelse ($upcomingExams as $exam)
@@ -121,11 +121,11 @@
                                     </div>
                                     <div>
                                         <p class="text-sm font-semibold text-slate-900">{{ $exam->user->name }}</p>
-                                        <p class="text-xs text-slate-400">{{ $exam->autoSchool?->name ?? 'Auto-école' }}</p>
+                                        <p class="text-xs text-slate-400">{{ $exam->autoSchool?->name ?? 'مدرسة السياقة' }}</p>
                                     </div>
                                 </div>
                             @empty
-                                <p class="text-xs text-slate-400">No upcoming exams yet.</p>
+                                <p class="text-xs text-slate-400">لا توجد امتحانات قادمة بعد.</p>
                             @endforelse
                         </div>
                     </div>
@@ -134,8 +134,8 @@
                 <section class="agenda-timeline">
                     <div class="agenda-timeline-header">
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">Schedule</p>
-                            <h3 class="text-2xl font-extrabold text-slate-900" x-text="dateLabels[selectedDate] ?? 'Select a date'"></h3>
+                            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">البرنامج</p>
+                            <h3 class="text-2xl font-extrabold text-slate-900" x-text="dateLabels[selectedDate] ?? 'اختر تاريخًا'"></h3>
                         </div>
                         <div class="agenda-day-pill" x-text="selectedDate ? selectedDate.split('-')[2] : '--'"></div>
                     </div>
@@ -148,24 +148,26 @@
                                     <div class="flex items-start justify-between gap-3">
                                         <div>
                                             <p class="text-sm font-semibold text-slate-900">{{ $exam->user->name }}</p>
-                                            <p class="text-xs text-slate-500">{{ $exam->autoSchool?->name ?? 'Auto-école' }}</p>
-                                            <p class="text-xs text-slate-400">{{ $exam->note ?? 'Session programmée' }}</p>
+                                            <p class="text-xs text-slate-500">{{ $exam->autoSchool?->name ?? 'مدرسة السياقة' }}</p>
+                                            <p class="text-xs text-slate-400">{{ $exam->note ?? 'جلسة مبرمجة' }}</p>
                                         </div>
-                                        <span class="status-pill status-pill-slate">Planifié</span>
+                                        <span class="status-pill status-pill-{{ $exam->status === 'passed' ? 'emerald' : ($exam->status === 'failed' ? 'rose' : ($exam->status === 'postponed' ? 'amber' : 'slate')) }}">
+                                            {{ \App\Models\ExamSchedule::statusLabels()[$exam->status] ?? ucfirst($exam->status) }}
+                                        </span>
                                     </div>
                                     <div class="mt-4 flex flex-wrap gap-2">
-                                        <a href="{{ route('admin.exams.edit', $exam) }}" class="btn-ghost">Modifier</a>
+                                        <a href="{{ route('admin.exams.edit', $exam) }}" class="btn-ghost">تعديل</a>
                                         <form method="POST" action="{{ route('admin.exams.destroy', $exam) }}">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn-danger">Supprimer</button>
+                                            <button type="submit" class="btn-danger">حذف</button>
                                         </form>
                                     </div>
                                 </div>
                             </div>
                         @endforeach
                         <div class="timeline-empty space-y-3" x-show="!examsByDate[selectedDate]" x-cloak>
-                            <p>Aucun examen pour cette date.</p>
+                            <p>لا يوجد أي امتحان في هذا التاريخ.</p>
                         </div>
                     </div>
                 </section>
@@ -173,15 +175,15 @@
                 <aside class="agenda-panel agenda-panel-form">
                     <div class="agenda-panel-header">
                         <div>
-                            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">Add New Event</p>
-                            <h3 class="text-2xl font-extrabold text-slate-900">Planifier un examen</h3>
+                            <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">إضافة موعد جديد</p>
+                            <h3 class="text-2xl font-extrabold text-slate-900">برمجة امتحان</h3>
                         </div>
                     </div>
 
                     <form method="POST" action="{{ route('admin.exams.store') }}" class="agenda-form">
                         @csrf
-                        @include('admin.exams.partials.form', ['exam' => new \App\Models\ExamSchedule(), 'candidates' => $candidates, 'schools' => $schools])
-                        <button type="submit" class="btn-primary w-full justify-center">Save Event</button>
+                        @include('admin.exams.partials.form', ['exam' => new \App\Models\ExamSchedule(), 'candidates' => $candidates, 'schools' => $schools, 'canChooseSchool' => $canChooseSchool ?? true])
+                        <button type="submit" class="btn-primary w-full justify-center">حفظ الموعد</button>
                     </form>
                 </aside>
             </div>

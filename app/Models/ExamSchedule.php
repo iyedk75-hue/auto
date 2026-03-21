@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ExamSchedule extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     public const STATUS_PLANNED = 'planned';
     public const STATUS_PASSED = 'passed';
@@ -29,7 +30,22 @@ class ExamSchedule extends Model
 
     public static function statuses(): array
     {
-        return [self::STATUS_PLANNED];
+        return [
+            self::STATUS_PLANNED,
+            self::STATUS_PASSED,
+            self::STATUS_FAILED,
+            self::STATUS_POSTPONED,
+        ];
+    }
+
+    public static function statusLabels(): array
+    {
+        return [
+            self::STATUS_PLANNED => 'Planifié',
+            self::STATUS_PASSED => 'Réussi',
+            self::STATUS_FAILED => 'Échoué',
+            self::STATUS_POSTPONED => 'Reporté',
+        ];
     }
 
     public function user(): BelongsTo

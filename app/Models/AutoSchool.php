@@ -27,6 +27,16 @@ class AutoSchool extends Model
         return $this->hasMany(User::class);
     }
 
+    public function admins(): HasMany
+    {
+        return $this->hasMany(User::class)->where('role', User::ROLE_ADMIN);
+    }
+
+    public function candidates(): HasMany
+    {
+        return $this->hasMany(User::class)->where('role', User::ROLE_CANDIDATE);
+    }
+
     public function exams(): HasMany
     {
         return $this->hasMany(ExamSchedule::class);

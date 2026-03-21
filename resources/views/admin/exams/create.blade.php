@@ -11,7 +11,7 @@
             <div class="panel">
                 <form method="POST" action="{{ route('admin.exams.store') }}" class="space-y-6">
                     @csrf
-                    @include('admin.exams.partials.form', ['exam' => $exam, 'candidates' => $candidates, 'schools' => $schools])
+                    @include('admin.exams.partials.form', ['exam' => $exam, 'candidates' => $candidates, 'schools' => $schools, 'canChooseSchool' => $canChooseSchool ?? true])
 
                     <div class="flex items-center gap-3">
                         <button type="submit" class="btn-admin-entry">Enregistrer</button>

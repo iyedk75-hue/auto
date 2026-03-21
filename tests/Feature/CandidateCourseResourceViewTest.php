@@ -15,7 +15,9 @@ class CandidateCourseResourceViewTest extends TestCase
 
     public function test_candidate_course_page_uses_ordered_resource_stream_and_defaults_to_first_resource(): void
     {
-        $candidate = User::factory()->create();
+        $candidate = User::factory()->create([
+            'status' => 'active',
+        ]);
         $course = $this->makeCourse();
 
         $note = $course->resources()->create([
@@ -27,23 +29,13 @@ class CandidateCourseResourceViewTest extends TestCase
             'is_active' => true,
         ]);
 
-        $video = $course->resources()->create([
+        $audio = $course->resources()->create([
             'id' => (string) Str::uuid(),
-            'resource_type' => CourseResource::TYPE_VIDEO,
-            'title' => 'Vidéo priorité',
-            'file_path' => 'courses/protected/resources/video/priorite.mp4',
-            'file_mime' => 'video/mp4',
+            'resource_type' => CourseResource::TYPE_AUDIO,
+            'title' => 'Audio priorité',
+            'file_path' => 'courses/protected/resources/audio/priorite.mp3',
+            'file_mime' => 'audio/mpeg',
             'sort_order' => 2,
-            'is_active' => true,
-        ]);
-
-        $pdf = $course->resources()->create([
-            'id' => (string) Str::uuid(),
-            'resource_type' => CourseResource::TYPE_PDF,
-            'title' => 'Fiche PDF',
-            'file_path' => 'courses/protected/resources/pdf/priorite.pdf',
-            'file_mime' => 'application/pdf',
-            'sort_order' => 3,
             'is_active' => true,
         ]);
 
@@ -54,19 +46,19 @@ class CandidateCourseResourceViewTest extends TestCase
             ->assertOk()
             ->assertSee('data-course-resource-viewer', false)
             ->assertSee('data-selected-resource-key="'.$note->id.'"', false)
-            ->assertSeeInOrder(['Chapitre I', 'Vidéo priorité', 'Fiche PDF'], false)
+                ->assertSeeInOrder(['Chapitre I', 'Audio priorité'], false)
             ->assertSee('Supports du cours')
             ->assertSee('Note')
-            ->assertSee('Vidéo')
-            ->assertSee('PDF')
+                ->assertSee('Audio')
             ->assertSee('Texte de note')
-            ->assertSee('?resource='.$video->id.'#course-resource-viewer', false)
-            ->assertSee('?resource='.$pdf->id.'#course-resource-viewer', false);
+                ->assertSee('?resource='.$audio->id.'#course-resource-viewer', false);
     }
 
     public function test_candidate_can_select_a_specific_resource_from_query_string(): void
     {
-        $candidate = User::factory()->create();
+        $candidate = User::factory()->create([
+            'status' => 'active',
+        ]);
         $course = $this->makeCourse();
 
         $course->resources()->create([
@@ -78,12 +70,12 @@ class CandidateCourseResourceViewTest extends TestCase
             'is_active' => true,
         ]);
 
-        $pdf = $course->resources()->create([
+        $audio = $course->resources()->create([
             'id' => (string) Str::uuid(),
-            'resource_type' => CourseResource::TYPE_PDF,
-            'title' => 'Fiche PDF',
-            'file_path' => 'courses/protected/resources/pdf/priorite.pdf',
-            'file_mime' => 'application/pdf',
+            'resource_type' => CourseResource::TYPE_AUDIO,
+            'title' => 'Audio priorité',
+            'file_path' => 'courses/protected/resources/audio/priorite.mp3',
+            'file_mime' => 'audio/mpeg',
             'sort_order' => 2,
             'is_active' => true,
         ]);
@@ -91,25 +83,27 @@ class CandidateCourseResourceViewTest extends TestCase
         $this->actingAs($candidate)
             ->withSession(['locale' => 'fr'])
             ->withCookie('massar_locale', 'fr')
-            ->get(route('courses.show', ['course' => $course, 'resource' => $pdf->id]))
+                ->get(route('courses.show', ['course' => $course, 'resource' => $audio->id]))
             ->assertOk()
-            ->assertSee('data-selected-resource-key="'.$pdf->id.'"', false)
-            ->assertSee('Fiche PDF')
-            ->assertSee(route('courses.resources.file', [$course, $pdf]), false);
+                ->assertSee('data-selected-resource-key="'.$audio->id.'"', false)
+                ->assertSee('Audio priorité')
+                ->assertSee('Non demarre')
+                ->assertSee(route('courses.resources.file', [$course, $audio], false), false);
     }
 
-    public function test_invalid_selection_falls_back_to_first_legacy_resource(): void
+    public function test_invalid_selection_falls_back_to_first_legacy_audio_resource(): void
     {
-        $candidate = User::factory()->create();
+        $candidate = User::factory()->create([
+            'status' => 'active',
+        ]);
         $course = Course::create([
             'id' => (string) Str::uuid(),
             'category' => Course::CATEGORIES[0],
             'title' => 'Cours legacy',
             'description' => 'Description',
             'content' => 'Contenu',
-            'media_path' => 'courses/protected/media/legacy-video.mp4',
-            'media_mime' => 'video/mp4',
-            'pdf_path' => 'courses/protected/pdf/legacy-guide.pdf',
+            'audio_path' => 'courses/protected/audio/legacy-audio.mp3',
+            'audio_mime' => 'audio/mpeg',
             'sort_order' => 1,
             'is_active' => true,
         ]);
@@ -119,9 +113,8 @@ class CandidateCourseResourceViewTest extends TestCase
             ->withCookie('massar_locale', 'fr')
             ->get(route('courses.show', ['course' => $course, 'resource' => 'missing-key']))
             ->assertOk()
-            ->assertSee('data-selected-resource-key="legacy-media"', false)
-            ->assertSee(route('courses.media', $course), false)
-            ->assertSee('?resource=legacy-pdf#course-resource-viewer', false);
+                ->assertSee('data-selected-resource-key="legacy-audio"', false)
+                ->assertSee(route('courses.audio', $course, false), false);
     }
 
     private function makeCourse(): Course

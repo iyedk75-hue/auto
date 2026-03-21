@@ -2,10 +2,10 @@
     <x-slot name="header">
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div class="space-y-3">
-                <p class="kicker">Candidats</p>
-                <h2 class="text-4xl font-extrabold tracking-tight text-slate-950">Modifier un candidat</h2>
+                <p class="kicker">{{ __('ui.admin_candidates.kicker') }}</p>
+                <h2 class="text-4xl font-extrabold tracking-tight text-slate-950">{{ __('ui.admin_candidates.edit_title') }}</h2>
             </div>
-            <a href="{{ route('admin.candidates.show', $candidate) }}" class="btn-ghost">Retour</a>
+            <a href="{{ route('admin.candidates.show', $candidate) }}" class="btn-ghost">{{ __('ui.admin_candidates.back') }}</a>
         </div>
     </x-slot>
 
@@ -15,11 +15,11 @@
                 <form method="POST" action="{{ route('admin.candidates.update', $candidate) }}" class="space-y-6">
                     @csrf
                     @method('PATCH')
-                    @include('admin.candidates.partials.form', ['candidate' => $candidate, 'schools' => $schools])
+                    @include('admin.candidates.partials.form', ['candidate' => $candidate, 'schools' => $schools, 'canChooseSchool' => $canChooseSchool ?? true])
 
                     <div class="flex items-center gap-3">
-                        <button type="submit" class="btn-admin-entry">Sauvegarder</button>
-                        <a href="{{ route('admin.candidates.show', $candidate) }}" class="btn-ghost">Annuler</a>
+                        <button type="submit" class="btn-admin-entry">{{ __('ui.admin_candidates.save') }}</button>
+                        <a href="{{ route('admin.candidates.show', $candidate) }}" class="btn-ghost">{{ __('ui.admin_candidates.cancel') }}</a>
                     </div>
                 </form>
             </div>

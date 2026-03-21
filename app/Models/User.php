@@ -6,14 +6,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
+    public const ROLE_SUPER_ADMIN = 'super_admin';
     public const ROLE_ADMIN = 'admin';
     public const ROLE_CANDIDATE = 'candidate';
 
@@ -68,7 +70,22 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
+        return in_array($this->role, [self::ROLE_SUPER_ADMIN, self::ROLE_ADMIN], true);
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === self::ROLE_SUPER_ADMIN;
+    }
+
+    public function isSchoolAdmin(): bool
+    {
         return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function hasLearningAccess(): bool
+    {
+        return $this->isAdmin() || ($this->status ?? 'inactive') === 'active';
     }
 
     public function autoSchool(): BelongsTo

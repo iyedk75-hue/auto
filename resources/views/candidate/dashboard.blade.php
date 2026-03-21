@@ -16,11 +16,13 @@
             <div class="panel bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-400 text-white">
                 <p class="text-xs font-semibold uppercase tracking-[0.28em] text-white/70">{{ __('ui.candidate_dashboard.quiz_kicker') }}</p>
                 <p class="mt-4 text-sm leading-6 text-white/90">
-                    {{ __('ui.candidate_dashboard.quiz_body') }}
+                    {{ $canAccessLearning ? __('ui.candidate_dashboard.quiz_body') : __('ui.candidate_access.payment_required') }}
                 </p>
                 <div class="mt-4">
-                    @if ($hasQuestions)
+                    @if ($canAccessLearning && $hasQuestions)
                         <a href="{{ route('quiz.show') }}" class="btn-primary">{{ __('ui.candidate_dashboard.start_quiz') }}</a>
+                    @elseif (! $canAccessLearning)
+                        <a href="{{ route('payments.index') }}" class="btn-primary">{{ __('ui.payments.complete_bank_transfer') }}</a>
                     @else
                         <span class="btn-ghost">{{ __('ui.candidate_dashboard.no_questions') }}</span>
                     @endif
@@ -31,6 +33,21 @@
 
     <div class="py-10">
         <div class="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
+            @unless ($canAccessLearning)
+                <section class="overflow-hidden rounded-[2rem] border border-amber-300 bg-gradient-to-r from-amber-50 via-orange-50 to-white shadow-[0_24px_80px_-48px_rgba(194,65,12,0.45)]">
+                    <div class="grid gap-6 px-6 py-6 lg:grid-cols-[1.2fr_0.8fr] lg:px-8">
+                        <div class="space-y-3">
+                            <p class="kicker text-amber-700">{{ __('ui.candidate_access.pending_kicker') }}</p>
+                            <h3 class="text-2xl font-extrabold tracking-tight text-slate-950">{{ __('ui.candidate_access.pending_title') }}</h3>
+                            <p class="max-w-2xl text-sm leading-7 text-slate-700">{{ __('ui.candidate_access.payment_required') }}</p>
+                        </div>
+                        <div class="flex items-center lg:justify-end">
+                            <a href="{{ route('payments.index') }}" class="btn-admin-entry">{{ __('ui.payments.complete_bank_transfer') }}</a>
+                        </div>
+                    </div>
+                </section>
+            @endunless
+
             <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <div class="panel-muted">
                     <p class="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">{{ __('ui.candidate_dashboard.status') }}</p>
@@ -93,6 +110,11 @@
                 <div class="panel">
                     <p class="kicker">{{ __('ui.candidate_dashboard.next_steps') }}</p>
                     <div class="mt-5 space-y-4 text-sm leading-6 text-slate-600">
+                        @unless ($canAccessLearning)
+                            <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900">
+                                {{ __('ui.candidate_access.pending_review_dashboard') }}
+                            </div>
+                        @endunless
                         <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
                             {{ __('ui.candidate_dashboard.steps.quiz') }}
                         </div>
@@ -103,6 +125,25 @@
                             {{ __('ui.candidate_dashboard.steps.exam') }}
                         </div>
                     </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <p class="kicker">Notifications</p>
+                <div class="mt-5 space-y-4">
+                    @forelse ($notifications as $notification)
+                        <div class="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                            <div class="flex items-center justify-between gap-4">
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-900">{{ $notification->data['title'] ?? 'Notification' }}</p>
+                                    <p class="mt-1 text-sm text-slate-600">{{ $notification->data['body'] ?? '' }}</p>
+                                </div>
+                                <span class="text-xs font-medium text-slate-400">{{ $notification->created_at->format('d M Y') }}</span>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-sm text-slate-500">Aucune notification pour le moment.</p>
+                    @endforelse
                 </div>
             </section>
         </div>

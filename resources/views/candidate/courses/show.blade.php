@@ -43,23 +43,11 @@
                                     @endphp
                                     <a href="{{ $resource['select_url'] }}" class="classroom-resource-item {{ $isSelected ? 'classroom-resource-item-active' : '' }}" aria-current="{{ $isSelected ? 'true' : 'false' }}">
                                         <span class="classroom-resource-icon {{ $isSelected ? 'classroom-resource-icon-active' : '' }}">
-                                            @if ($resource['viewer_kind'] === 'video')
+                                            @if ($resource['viewer_kind'] === 'audio')
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                                    <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h6A2.5 2.5 0 0 1 15 7.5v9A2.5 2.5 0 0 1 12.5 19h-6A2.5 2.5 0 0 1 4 16.5z" />
-                                                    <path d="m15 10 5-3v10l-5-3z" />
-                                                </svg>
-                                            @elseif ($resource['viewer_kind'] === 'pdf')
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                                    <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
-                                                    <path d="M14 3v5h5" />
-                                                    <path d="M8 13h8" />
-                                                    <path d="M8 17h5" />
-                                                </svg>
-                                            @elseif ($resource['viewer_kind'] === 'image')
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                                    <rect x="3" y="5" width="18" height="14" rx="2" />
-                                                    <circle cx="8.5" cy="10.5" r="1.5" />
-                                                    <path d="m21 15-5-5L5 21" />
+                                                    <path d="M11 5 6 9H3v6h3l5 4z" />
+                                                    <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+                                                    <path d="M18.5 6a8.5 8.5 0 0 1 0 12" />
                                                 </svg>
                                             @else
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -71,6 +59,9 @@
                                             <span class="classroom-resource-title">{{ $resource['display_title'] }}</span>
                                             @if ($resource['meta_label'])
                                                 <span class="classroom-resource-meta">{{ $resource['meta_label'] }}</span>
+                                            @endif
+                                            @if ($resource['viewer_kind'] === 'audio')
+                                                <span class="classroom-resource-meta" data-audio-status-label data-audio-storage-key="{{ $resource['viewer_storage_key'] }}">{{ __('ui.classroom.audio_status_idle') }}</span>
                                             @endif
                                         </span>
                                         <span class="classroom-resource-action" aria-hidden="true">
@@ -103,19 +94,35 @@
                             </div>
 
                             @switch($selectedResource['viewer_kind'])
-                                @case('video')
-                                    <video class="mt-6 w-full rounded-[1.75rem] bg-slate-950" controls controlsList="nodownload noplaybackrate" disablePictureInPicture>
-                                        <source src="{{ $selectedResource['viewer_url'] }}" type="{{ $selectedResource['file_mime'] ?? 'video/mp4' }}" />
-                                    </video>
-                                @break
-
-                                @case('pdf')
-                                    <p class="classroom-section-text">{{ __('ui.classroom.online_only') }}</p>
-                                    <iframe class="mt-4 h-[38rem] w-full rounded-[1.75rem] border border-slate-200 bg-white" src="{{ $selectedResource['viewer_url'] }}"></iframe>
-                                @break
-
-                                @case('image')
-                                    <img src="{{ $selectedResource['viewer_url'] }}" alt="{{ $selectedResource['display_title'] }}" class="mt-6 w-full rounded-[1.75rem] object-cover" draggable="false" />
+                                @case('audio')
+                                    <div class="mt-6 space-y-4 rounded-[1.75rem] border border-slate-200 bg-slate-50 p-5" data-audio-player data-audio-key="{{ $selectedResource['viewer_storage_key'] ?? $selectedResource['viewer_url'] }}">
+                                        <audio class="w-full" controls controlsList="nodownload noplaybackrate" preload="metadata" data-audio-element>
+                                            <source src="{{ $selectedResource['viewer_url'] }}" type="{{ $selectedResource['file_mime'] ?? 'audio/mpeg' }}" />
+                                        </audio>
+                                        <div class="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-600">
+                                            <div class="flex items-center gap-3">
+                                                <button type="button" class="btn-ghost px-4 py-2" data-audio-skip="-10">{{ __('ui.classroom.audio_back') }}</button>
+                                                <button type="button" class="btn-ghost px-4 py-2" data-audio-skip="10">{{ __('ui.classroom.audio_forward') }}</button>
+                                            </div>
+                                            <label class="flex items-center gap-2">
+                                                <span>{{ __('ui.classroom.audio_speed') }}</span>
+                                                <select class="form-input-auth min-w-[110px] py-2" data-audio-rate>
+                                                    <option value="1">1x</option>
+                                                    <option value="1.25">1.25x</option>
+                                                    <option value="1.5">1.5x</option>
+                                                    <option value="1.75">1.75x</option>
+                                                </select>
+                                            </label>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <input type="range" min="0" max="100" value="0" class="w-full accent-orange-500" data-audio-progress />
+                                            <div class="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                                                <span data-audio-current>0:00</span>
+                                                <span data-audio-status-current>{{ __('ui.classroom.audio_status_idle') }}</span>
+                                                <span data-audio-duration>0:00</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 @break
 
                                 @default
@@ -182,4 +189,5 @@
 
         <div class="protection-feedback hidden" data-protection-feedback></div>
     </div>
+
 </x-app-layout>

@@ -45,7 +45,7 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'role' => User::ROLE_CANDIDATE,
             'auto_school_id' => $autoSchool?->id,
-            'status' => 'active',
+            'status' => 'inactive',
             'registered_at' => now(),
             'password' => Hash::make($request->password),
         ]);

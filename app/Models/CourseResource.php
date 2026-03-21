@@ -18,21 +18,16 @@ class CourseResource extends Model
 
     protected $keyType = 'string';
 
-    public const TYPE_VIDEO = 'video';
-
-    public const TYPE_PDF = 'pdf';
+    public const TYPE_AUDIO = 'audio';
 
     public const TYPE_NOTE = 'note';
 
     public const TYPES = [
-        self::TYPE_VIDEO,
-        self::TYPE_PDF,
+        self::TYPE_AUDIO,
         self::TYPE_NOTE,
     ];
 
-    public const PROTECTED_VIDEO_DIRECTORY = 'courses/protected/resources/video';
-
-    public const PROTECTED_PDF_DIRECTORY = 'courses/protected/resources/pdf';
+    public const PROTECTED_AUDIO_DIRECTORY = 'courses/protected/resources/audio';
 
     protected $fillable = [
         'id',
@@ -59,14 +54,9 @@ class CourseResource extends Model
         return $this->belongsTo(Course::class);
     }
 
-    public function isVideo(): bool
+    public function isAudio(): bool
     {
-        return $this->resource_type === self::TYPE_VIDEO;
-    }
-
-    public function isPdf(): bool
-    {
-        return $this->resource_type === self::TYPE_PDF;
+        return $this->resource_type === self::TYPE_AUDIO;
     }
 
     public function isNote(): bool
@@ -76,7 +66,7 @@ class CourseResource extends Model
 
     public function isFileResource(): bool
     {
-        return $this->isVideo() || $this->isPdf();
+        return $this->isAudio();
     }
 
     public function titleForLocale(?string $locale = null): ?string

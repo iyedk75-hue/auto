@@ -47,13 +47,10 @@
                             <div class="flex items-center justify-between">
                                 <span>{{ __('ui.admin_courses.assets') }}</span>
                                 <span class="font-semibold text-slate-900">
-                                    @if ($course->media_path)
-                                        {{ \Illuminate\Support\Str::startsWith($course->media_mime ?? '', 'image/') ? __('ui.admin_courses.image') : __('ui.admin_courses.video') }}
+                                    @if ($course->audio_path)
+                                        {{ $course->hasAudioMedia() ? __('ui.admin_courses.audio_label') : __('ui.admin_courses.no_media') }}
                                     @else
                                         {{ __('ui.admin_courses.no_media') }}
-                                    @endif
-                                    @if ($course->pdf_path)
-                                        · PDF
                                     @endif
                                 </span>
                             </div>
@@ -64,7 +61,7 @@
                         </div>
 
                         @php
-                            $hasLegacySupports = ! $course->resources_count && ($course->media_path || $course->pdf_path);
+                            $hasLegacySupports = ! $course->resources_count && $course->hasAudioMedia();
                             $resourceStateLabel = $course->resources_count
                                 ? __('ui.admin_courses.resource_state_child')
                                 : ($hasLegacySupports ? __('ui.admin_courses.resource_state_legacy') : __('ui.admin_courses.resource_state_empty'));

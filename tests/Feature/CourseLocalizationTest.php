@@ -64,7 +64,9 @@ class CourseLocalizationTest extends TestCase
 
     public function test_candidate_course_page_renders_arabic_content_when_available(): void
     {
-        $candidate = User::factory()->create();
+        $candidate = User::factory()->create([
+            'status' => 'active',
+        ]);
         $course = $this->makeCourse([
             'title' => 'Priorité',
             'description' => 'Description française',
@@ -87,7 +89,9 @@ class CourseLocalizationTest extends TestCase
 
     public function test_candidate_course_page_shows_unavailable_state_when_arabic_content_is_missing(): void
     {
-        $candidate = User::factory()->create();
+        $candidate = User::factory()->create([
+            'status' => 'active',
+        ]);
         $course = $this->makeCourse([
             'title' => 'Priorité',
             'description' => 'Description française',

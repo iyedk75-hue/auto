@@ -2,11 +2,11 @@
     <x-slot name="header">
         <div class="flex flex-wrap items-start justify-between gap-4">
             <div class="space-y-2">
-                <p class="kicker">Questions</p>
-                <h2 class="text-4xl font-extrabold tracking-tight text-slate-950">Banque de questions</h2>
-                <p class="text-sm text-slate-600">Gérez les questions officielles du code de la route.</p>
+                <p class="kicker">الأسئلة</p>
+                <h2 class="text-4xl font-extrabold tracking-tight text-slate-950">بنك الأسئلة</h2>
+                <p class="text-sm text-slate-600">أدر الأسئلة الرسمية الخاصة بقانون السير.</p>
             </div>
-            <a href="{{ route('admin.questions.create') }}" class="btn-admin-entry">Ajouter une question</a>
+            <a href="{{ route('admin.questions.create') }}" class="btn-admin-entry">إضافة سؤال</a>
         </div>
     </x-slot>
 
@@ -19,24 +19,24 @@
                             <div>
                                 <p class="kicker">{{ ucfirst(str_replace('_', ' ', $question->category)) }}</p>
                                 <h3 class="mt-2 text-2xl font-extrabold text-slate-950">{{ $question->question_text }}</h3>
-                                <p class="mt-2 text-sm text-slate-500">Difficulté : {{ ucfirst($question->difficulty) }}</p>
+                                <p class="mt-2 text-sm text-slate-500">الصعوبة: {{ ucfirst($question->difficulty) }}</p>
                             </div>
                             <div class="flex items-center gap-3">
                                 <span class="status-pill status-pill-{{ $question->is_active ? 'emerald' : 'slate' }}">
-                                    {{ $question->is_active ? 'Active' : 'Inactive' }}
+                                    {{ $question->is_active ? 'نشط' : 'غير نشط' }}
                                 </span>
-                                <a href="{{ route('admin.questions.edit', $question) }}" class="btn-ghost">Modifier</a>
+                                <a href="{{ route('admin.questions.edit', $question) }}" class="btn-ghost">تعديل</a>
                                 <form method="POST" action="{{ route('admin.questions.destroy', $question) }}">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn-danger">Supprimer</button>
+                                    <button type="submit" class="btn-danger">حذف</button>
                                 </form>
                             </div>
                         </div>
                     </article>
                 @empty
                     <div class="rounded-[2rem] border border-dashed border-slate-300 bg-white/70 p-10 text-sm text-slate-500">
-                        Aucune question disponible.
+                        لا توجد أسئلة متاحة.
                     </div>
                 @endforelse
             </div>

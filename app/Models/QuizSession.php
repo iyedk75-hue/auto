@@ -14,6 +14,7 @@ class QuizSession extends Model
     protected $fillable = [
         'user_id',
         'difficulty',
+        'question_category',
         'score',
         'total_questions',
         'started_at',
@@ -33,5 +34,10 @@ class QuizSession extends Model
     public function answers(): HasMany
     {
         return $this->hasMany(QuizAnswer::class);
+    }
+
+    public function chapterLabel(): string
+    {
+        return Question::categoryLabels()[$this->question_category] ?? 'Quiz general';
     }
 }

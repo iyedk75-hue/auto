@@ -12,6 +12,9 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo pdo_pgsql zip bcmath \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Increase upload limits
+COPY docker/php-uploads.ini /usr/local/etc/php/conf.d/99-uploads.ini
+
 # Install Composer
 COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
 
@@ -49,7 +52,6 @@ CMD php artisan config:cache && \
     php artisan migrate --force && \
     php artisan codex:seed-if-empty --force && \
     php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
-
 
 
 

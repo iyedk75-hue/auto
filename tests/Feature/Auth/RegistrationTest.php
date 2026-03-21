@@ -30,6 +30,7 @@ class RegistrationTest extends TestCase
         $this->assertAuthenticated();
         $response->assertRedirect(route('dashboard', absolute: false));
         $this->assertSame(User::ROLE_CANDIDATE, User::firstWhere('email', 'test@example.com')?->role);
+        $this->assertSame('inactive', User::firstWhere('email', 'test@example.com')?->status);
     }
 
     public function test_registration_requires_unique_email(): void

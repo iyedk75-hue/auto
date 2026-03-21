@@ -54,8 +54,8 @@
 
     <div>
         <label class="mb-2 block text-sm font-semibold text-slate-700">{{ __('ui.admin_course_resources.resource_file') }}</label>
-        <input type="file" name="resource_file" class="form-input-auth" accept="video/mp4,video/webm,application/pdf" />
-        <p class="mt-2 text-xs text-slate-400">{{ __('ui.admin_course_resources.file_hint_video') }} {{ __('ui.admin_course_resources.file_hint_pdf') }}</p>
+        <input type="file" name="resource_file" class="form-input-auth" accept="audio/*" />
+        <p class="mt-2 text-xs text-slate-400">{{ __('ui.admin_course_resources.file_hint_audio') }}</p>
         <x-input-error :messages="$errors->get('resource_file')" class="mt-2" />
         @if ($resource->file_path)
             <p class="mt-2 text-xs font-semibold text-sky-600">

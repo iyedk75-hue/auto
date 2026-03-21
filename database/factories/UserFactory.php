@@ -49,4 +49,12 @@ class UserFactory extends Factory
             'role' => 'admin',
         ]);
     }
+
+    public function superAdmin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'super_admin',
+            'auto_school_id' => null,
+        ]);
+    }
 }

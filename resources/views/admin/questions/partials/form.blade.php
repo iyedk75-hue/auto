@@ -5,7 +5,7 @@
 <div class="grid gap-6">
     <div class="grid gap-4 sm:grid-cols-2">
         <div>
-            <label class="mb-2 block text-sm font-semibold text-slate-700">Catégorie</label>
+            <label class="mb-2 block text-sm font-semibold text-slate-700">الفئة</label>
             <select name="category" class="form-input-auth">
                 @foreach (\App\Models\Question::CATEGORIES as $category)
                     <option value="{{ $category }}" @selected(old('category', $question->category) === $category)>
@@ -16,7 +16,7 @@
             <x-input-error :messages="$errors->get('category')" class="mt-2" />
         </div>
         <div>
-            <label class="mb-2 block text-sm font-semibold text-slate-700">Difficulté</label>
+            <label class="mb-2 block text-sm font-semibold text-slate-700">الصعوبة</label>
             <select name="difficulty" class="form-input-auth">
                 @foreach (\App\Models\Question::DIFFICULTIES as $difficulty)
                     <option value="{{ $difficulty }}" @selected(old('difficulty', $question->difficulty ?? 'easy') === $difficulty)>
@@ -29,14 +29,27 @@
     </div>
 
     <div>
-        <label class="mb-2 block text-sm font-semibold text-slate-700">Question</label>
+        <label class="mb-2 block text-sm font-semibold text-slate-700">السؤال</label>
         <textarea name="question_text" rows="3" class="form-input-auth">{{ old('question_text', $question->question_text) }}</textarea>
         <x-input-error :messages="$errors->get('question_text')" class="mt-2" />
     </div>
 
     <div>
-        <label class="mb-2 block text-sm font-semibold text-slate-700">Image (URL)</label>
-        <input type="url" name="image_url" class="form-input-auth" value="{{ old('image_url', $question->image_url) }}" placeholder="https://" />
+        <label class="mb-2 block text-sm font-semibold text-slate-700">صورة الاختبار</label>
+        <input type="file" name="image" accept="image/*" class="form-input-auth" />
+        <p class="mt-2 text-xs text-slate-400">الصيغ المقبولة: JPG و PNG و WEBP. الحد الأقصى: 10 MB.</p>
+        <x-input-error :messages="$errors->get('image')" class="mt-2" />
+        @if (old('image_url', $question->image_url))
+            <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                <img src="{{ old('image_url', $question->image_url) }}" alt="معاينة السؤال" class="max-h-64 w-full rounded-xl object-contain bg-white" />
+            </div>
+        @endif
+    </div>
+
+    <div>
+        <label class="mb-2 block text-sm font-semibold text-slate-700">الصورة عبر رابط خارجي</label>
+        <input type="url" name="image_url" class="form-input-auth" value="{{ old('image_url', $question->externalImageUrl()) }}" placeholder="https://" />
+        <p class="mt-2 text-xs text-slate-400">اختياري إذا كنت تفضّل استعمال صورة مستضافة مسبقًا.</p>
         <x-input-error :messages="$errors->get('image_url')" class="mt-2" />
     </div>
 
@@ -60,7 +73,7 @@
 
     <div class="grid gap-4 sm:grid-cols-2">
         <div>
-            <label class="mb-2 block text-sm font-semibold text-slate-700">Bonne réponse</label>
+            <label class="mb-2 block text-sm font-semibold text-slate-700">الإجابة الصحيحة</label>
             <select name="correct_answer" class="form-input-auth">
                 @foreach (['أ', 'ب', 'ج'] as $answer)
                     <option value="{{ $answer }}" @selected(old('correct_answer', $question->correct_answer) === $answer)>{{ $answer }}</option>
@@ -70,12 +83,12 @@
         </div>
         <div class="flex items-center gap-3 pt-7">
             <input id="is_active" type="checkbox" name="is_active" value="1" class="rounded border-slate-300 text-orange-600 shadow-sm" @checked(old('is_active', $question->is_active ?? true))>
-            <label for="is_active" class="text-sm font-semibold text-slate-700">Question active</label>
+            <label for="is_active" class="text-sm font-semibold text-slate-700">سؤال نشط</label>
         </div>
     </div>
 
     <div>
-        <label class="mb-2 block text-sm font-semibold text-slate-700">Explication pédagogique</label>
+        <label class="mb-2 block text-sm font-semibold text-slate-700">شرح بيداغوجي</label>
         <textarea name="explanation" rows="3" class="form-input-auth">{{ old('explanation', $question->explanation) }}</textarea>
         <x-input-error :messages="$errors->get('explanation')" class="mt-2" />
     </div>

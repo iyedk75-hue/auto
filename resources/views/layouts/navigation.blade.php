@@ -1,5 +1,7 @@
 @php
     $isAdmin = auth()->check() && auth()->user()->isAdmin();
+    $isSuperAdmin = $isAdmin && auth()->user()->isSuperAdmin();
+    $canAccessLearning = auth()->check() && auth()->user()->hasLearningAccess();
     $brandTarget = auth()->check()
         ? ($isAdmin ? route('admin.dashboard') : route('dashboard'))
         : route('home');
@@ -27,64 +29,58 @@
                     </svg>
                     <span class="sr-only">{{ __('ui.nav.candidates') }}</span>
                 </a>
-                <a href="{{ route('admin.courses.index') }}" @class(['sidebar-link', 'sidebar-link-active' => request()->routeIs('admin.courses.*')]) title="{{ __('ui.nav.courses') }}">
-                    <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 5h11a3 3 0 0 1 3 3v11" />
-                        <path d="M4 5v11a3 3 0 0 0 3 3h11" />
-                        <path d="M8 9h6" />
-                        <path d="M8 13h6" />
-                    </svg>
-                    <span class="sr-only">{{ __('ui.nav.courses') }}</span>
-                </a>
-                <a href="{{ route('admin.questions.index') }}" @class(['sidebar-link', 'sidebar-link-active' => request()->routeIs('admin.questions.*')]) title="{{ __('ui.nav.questions') }}">
-                    <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 18h.01" />
-                        <path d="M9.09 9a3 3 0 0 1 5.82 1c0 2-3 2-3 4" />
-                        <circle cx="12" cy="12" r="9" />
-                    </svg>
-                    <span class="sr-only">{{ __('ui.nav.questions') }}</span>
-                </a>
-                <a href="{{ route('admin.payments.index') }}" @class(['sidebar-link', 'sidebar-link-active' => request()->routeIs('admin.payments.*')]) title="{{ __('ui.nav.payments') }}">
-                    <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="5" width="18" height="14" rx="2" />
-                        <path d="M3 10h18" />
-                        <path d="M7 15h4" />
-                    </svg>
-                    <span class="sr-only">{{ __('ui.nav.payments') }}</span>
-                </a>
-                <a href="{{ route('admin.exams.index') }}" @class(['sidebar-link', 'sidebar-link-active' => request()->routeIs('admin.exams.*')]) title="{{ __('ui.nav.exams') }}">
-                    <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="4" width="18" height="18" rx="2" />
-                        <path d="M16 2v4" />
-                        <path d="M8 2v4" />
-                        <path d="M3 10h18" />
-                    </svg>
-                    <span class="sr-only">{{ __('ui.nav.exams') }}</span>
-                </a>
+                @if ($isSuperAdmin)
+                    <a href="{{ route('admin.payments.index') }}" @class(['sidebar-link', 'sidebar-link-active' => request()->routeIs('admin.payments.*')]) title="{{ __('ui.nav.payments') }}">
+                        <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="5" width="18" height="14" rx="2" />
+                            <path d="M3 10h18" />
+                            <path d="M7 15h4" />
+                        </svg>
+                        <span class="sr-only">{{ __('ui.nav.payments') }}</span>
+                    </a>
+                @else
+                    <a href="{{ route('admin.courses.index') }}" @class(['sidebar-link', 'sidebar-link-active' => request()->routeIs('admin.courses.*')]) title="{{ __('ui.nav.courses') }}">
+                        <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 5h11a3 3 0 0 1 3 3v11" />
+                            <path d="M4 5v11a3 3 0 0 0 3 3h11" />
+                            <path d="M8 9h6" />
+                            <path d="M8 13h6" />
+                        </svg>
+                        <span class="sr-only">{{ __('ui.nav.courses') }}</span>
+                    </a>
+                    <a href="{{ route('admin.questions.index') }}" @class(['sidebar-link', 'sidebar-link-active' => request()->routeIs('admin.questions.*')]) title="{{ __('ui.nav.questions') }}">
+                        <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 18h.01" />
+                            <path d="M9.09 9a3 3 0 0 1 5.82 1c0 2-3 2-3 4" />
+                            <circle cx="12" cy="12" r="9" />
+                        </svg>
+                        <span class="sr-only">{{ __('ui.nav.questions') }}</span>
+                    </a>
+                    <a href="{{ route('admin.exams.index') }}" @class(['sidebar-link', 'sidebar-link-active' => request()->routeIs('admin.exams.*')]) title="{{ __('ui.nav.exams') }}">
+                        <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" />
+                            <path d="M16 2v4" />
+                            <path d="M8 2v4" />
+                            <path d="M3 10h18" />
+                        </svg>
+                        <span class="sr-only">{{ __('ui.nav.exams') }}</span>
+                    </a>
+                @endif
+                @if ($isSuperAdmin)
+                    <a href="{{ route('admin.auto-schools.index') }}" @class(['sidebar-link', 'sidebar-link-active' => request()->routeIs('admin.auto-schools.*')]) title="{{ __('ui.nav.auto_schools') }}">
+                        <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 21V7l9-4 9 4v14" />
+                            <path d="M9 21V11h6v10" />
+                        </svg>
+                        <span class="sr-only">{{ __('ui.nav.auto_schools') }}</span>
+                    </a>
+                @endif
             @else
                 <a href="{{ route('dashboard') }}" @class(['sidebar-link', 'sidebar-link-active' => request()->routeIs('dashboard')]) title="{{ __('ui.nav.dashboard') }}">
                     <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M3 10.5L12 3l9 7.5v9a1.5 1.5 0 0 1-1.5 1.5H16.5A1.5 1.5 0 0 1 15 19.5V15a1.5 1.5 0 0 0-1.5-1.5h-3A1.5 1.5 0 0 0 9 15v4.5A1.5 1.5 0 0 1 7.5 21H4.5A1.5 1.5 0 0 1 3 19.5z" />
                     </svg>
                     <span class="sr-only">{{ __('ui.nav.dashboard') }}</span>
-                </a>
-                <a href="{{ route('quiz.show') }}" @class(['sidebar-link', 'sidebar-link-active' => request()->routeIs('quiz.*')]) title="{{ __('ui.nav.quiz') }}">
-                    <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M7 7h10" />
-                        <path d="M7 11h10" />
-                        <path d="M7 15h6" />
-                        <rect x="4" y="3" width="16" height="18" rx="2" />
-                    </svg>
-                    <span class="sr-only">{{ __('ui.nav.quiz') }}</span>
-                </a>
-                <a href="{{ route('courses.index') }}" @class(['sidebar-link', 'sidebar-link-active' => request()->routeIs('courses.*')]) title="{{ __('ui.nav.courses') }}">
-                    <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 5h11a3 3 0 0 1 3 3v11" />
-                        <path d="M4 5v11a3 3 0 0 0 3 3h11" />
-                        <path d="M8 9h6" />
-                        <path d="M8 13h6" />
-                    </svg>
-                    <span class="sr-only">{{ __('ui.nav.courses') }}</span>
                 </a>
                 <a href="{{ route('payments.index') }}" @class(['sidebar-link', 'sidebar-link-active' => request()->routeIs('payments.*')]) title="{{ __('ui.nav.payments') }}">
                     <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -94,6 +90,33 @@
                     </svg>
                     <span class="sr-only">{{ __('ui.nav.payments') }}</span>
                 </a>
+                @if ($canAccessLearning)
+                    <a href="{{ route('quiz.show') }}" @class(['sidebar-link', 'sidebar-link-active' => request()->routeIs('quiz.*')]) title="{{ __('ui.nav.quiz') }}">
+                        <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M7 7h10" />
+                            <path d="M7 11h10" />
+                            <path d="M7 15h6" />
+                            <rect x="4" y="3" width="16" height="18" rx="2" />
+                        </svg>
+                        <span class="sr-only">{{ __('ui.nav.quiz') }}</span>
+                    </a>
+                    <a href="{{ route('courses.index') }}" @class(['sidebar-link', 'sidebar-link-active' => request()->routeIs('courses.*')]) title="{{ __('ui.nav.courses') }}">
+                        <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 5h11a3 3 0 0 1 3 3v11" />
+                            <path d="M4 5v11a3 3 0 0 0 3 3h11" />
+                            <path d="M8 9h6" />
+                            <path d="M8 13h6" />
+                        </svg>
+                        <span class="sr-only">{{ __('ui.nav.courses') }}</span>
+                    </a>
+                    <a href="{{ route('quiz.history') }}" @class(['sidebar-link', 'sidebar-link-active' => request()->routeIs('quiz.history')]) title="{{ __('ui.nav.quiz_history') }}">
+                        <svg class="sidebar-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                        <span class="sr-only">{{ __('ui.nav.quiz_history') }}</span>
+                    </a>
+                @endif
             @endif
         </div>
 
@@ -134,7 +157,7 @@
                         {{ __('ui.nav.brand') }}
                     </span>
                     <span class="text-xs font-medium text-slate-500">
-                        {{ $isAdmin ? __('ui.nav.brand_subtitle_admin') : __('ui.nav.brand_subtitle_candidate') }}
+                        {{ $isSuperAdmin ? __('ui.nav.brand_subtitle_super_admin') : ($isAdmin ? __('ui.nav.brand_subtitle_admin') : __('ui.nav.brand_subtitle_candidate')) }}
                     </span>
                 </span>
             </a>
@@ -160,15 +183,24 @@
                 @if ($isAdmin)
                     <a href="{{ route('admin.dashboard') }}" class="mobile-nav-link">{{ __('ui.nav.dashboard') }}</a>
                     <a href="{{ route('admin.candidates.index') }}" class="mobile-nav-link">{{ __('ui.nav.candidates') }}</a>
-                    <a href="{{ route('admin.courses.index') }}" class="mobile-nav-link">{{ __('ui.nav.courses') }}</a>
-                    <a href="{{ route('admin.questions.index') }}" class="mobile-nav-link">{{ __('ui.nav.questions') }}</a>
-                    <a href="{{ route('admin.payments.index') }}" class="mobile-nav-link">{{ __('ui.nav.payments') }}</a>
-                    <a href="{{ route('admin.exams.index') }}" class="mobile-nav-link">{{ __('ui.nav.exams') }}</a>
+                    @if ($isSuperAdmin)
+                        <a href="{{ route('admin.payments.index') }}" class="mobile-nav-link">{{ __('ui.nav.payments') }}</a>
+                    @else
+                        <a href="{{ route('admin.courses.index') }}" class="mobile-nav-link">{{ __('ui.nav.courses') }}</a>
+                        <a href="{{ route('admin.questions.index') }}" class="mobile-nav-link">{{ __('ui.nav.questions') }}</a>
+                        <a href="{{ route('admin.exams.index') }}" class="mobile-nav-link">{{ __('ui.nav.exams') }}</a>
+                    @endif
+                    @if ($isSuperAdmin)
+                        <a href="{{ route('admin.auto-schools.index') }}" class="mobile-nav-link">{{ __('ui.nav.auto_schools') }}</a>
+                    @endif
                 @else
                     <a href="{{ route('dashboard') }}" class="mobile-nav-link">{{ __('ui.nav.dashboard') }}</a>
-                    <a href="{{ route('quiz.show') }}" class="mobile-nav-link">{{ __('ui.nav.quiz') }}</a>
-                    <a href="{{ route('courses.index') }}" class="mobile-nav-link">{{ __('ui.nav.courses') }}</a>
                     <a href="{{ route('payments.index') }}" class="mobile-nav-link">{{ __('ui.nav.payments') }}</a>
+                    @if ($canAccessLearning)
+                        <a href="{{ route('quiz.show') }}" class="mobile-nav-link">{{ __('ui.nav.quiz') }}</a>
+                        <a href="{{ route('courses.index') }}" class="mobile-nav-link">{{ __('ui.nav.courses') }}</a>
+                        <a href="{{ route('quiz.history') }}" class="mobile-nav-link">{{ __('ui.nav.quiz_history') }}</a>
+                    @endif
                 @endif
 
                 <a href="{{ route('profile.edit') }}" class="mobile-nav-link">{{ __('ui.nav.profile') }}</a>

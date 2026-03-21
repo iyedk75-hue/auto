@@ -89,28 +89,35 @@
         </div>
     </div>
 
-    <div class="grid gap-4 sm:grid-cols-2">
-        <div>
-            <label class="mb-2 block text-sm font-semibold text-slate-700">{{ __('ui.admin_courses.media') }}</label>
-            <input type="file" name="media" accept="image/*,video/*" class="form-input-auth" />
-            <p class="mt-2 text-xs text-slate-400">{{ __('ui.admin_courses.media_hint') }}</p>
-            <x-input-error :messages="$errors->get('media')" class="mt-2" />
-            @if ($course->media_path)
-                <a href="{{ $course->mediaUrl() }}" class="mt-2 inline-flex text-xs font-semibold text-sky-600 underline" target="_blank" rel="noreferrer">
-                    {{ __('ui.admin_courses.media_current') }}
-                </a>
-            @endif
-        </div>
-        <div>
-            <label class="mb-2 block text-sm font-semibold text-slate-700">{{ __('ui.admin_courses.pdf') }}</label>
-            <input type="file" name="pdf" accept="application/pdf" class="form-input-auth" />
-            <p class="mt-2 text-xs text-slate-400">{{ __('ui.admin_courses.pdf_hint') }}</p>
-            <x-input-error :messages="$errors->get('pdf')" class="mt-2" />
-            @if ($course->pdf_path)
-                <a href="{{ $course->pdfUrl() }}" class="mt-2 inline-flex text-xs font-semibold text-sky-600 underline" target="_blank" rel="noreferrer">
-                    {{ __('ui.admin_courses.pdf_current') }}
-                </a>
-            @endif
-        </div>
+    <div>
+        @php
+            $audioUploadLimit = ini_get('upload_max_filesize') ?: '2M';
+            $audioMaxAllowed = \App\Models\Course::audioMaxSizeLabel();
+        @endphp
+        <label class="mb-2 block text-sm font-semibold text-slate-700">{{ __('ui.admin_courses.audio') }}</label>
+        <input type="file" name="audio" accept="audio/*" class="form-input-auth" />
+        <p class="mt-2 text-xs text-slate-400">{{ __('ui.admin_courses.audio_hint') }}</p>
+        <p class="mt-1 text-xs font-semibold text-slate-500">{{ __('ui.admin_courses.audio_max_allowed', ['size' => $audioMaxAllowed]) }}</p>
+        <p class="mt-1 text-xs text-slate-400">{{ __('ui.admin_courses.audio_server_limit', ['size' => $audioUploadLimit]) }}</p>
+        <x-input-error :messages="$errors->get('audio')" class="mt-2" />
+        @if ($course->audioUrl())
+            <div class="mt-4 space-y-3 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm font-semibold text-slate-700">{{ __('ui.admin_courses.audio_preview') }}</p>
+                <audio class="w-full" controls preload="metadata">
+                    <source src="{{ $course->audioUrl() }}" type="{{ $course->audio_mime ?: 'audio/mpeg' }}" />
+                </audio>
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <p class="text-xs text-slate-500">{{ __('ui.admin_courses.audio_replace') }}</p>
+                    <a href="{{ $course->audioUrl() }}" class="inline-flex text-xs font-semibold text-sky-600 underline" target="_blank" rel="noreferrer">
+                        {{ __('ui.admin_courses.audio_current') }}
+                    </a>
+                </div>
+            </div>
+        @else
+            <div class="mt-4 rounded-[1.5rem] border border-amber-200 bg-amber-50 p-4">
+                <p class="text-sm font-semibold text-amber-900">{{ __('ui.admin_courses.audio_missing_title') }}</p>
+                <p class="mt-2 text-sm leading-6 text-amber-800">{{ __('ui.admin_courses.audio_missing_body', ['size' => $audioMaxAllowed]) }}</p>
+            </div>
+        @endif
     </div>
 </div>

@@ -25,8 +25,7 @@ class CourseProtectionTest extends TestCase
         $response = $this->actingAs($admin)->post(route('admin.courses.store'), [
             'title' => 'Protected lesson',
             'category' => Course::CATEGORIES[0],
-            'media' => UploadedFile::fake()->create('lesson.mp4', 1200, 'video/mp4'),
-            'pdf' => UploadedFile::fake()->create('lesson.pdf', 400, 'application/pdf'),
+            'audio' => UploadedFile::fake()->create('lesson.mp3', 1200, 'audio/mpeg'),
             'is_active' => '1',
         ]);
 
@@ -34,23 +33,19 @@ class CourseProtectionTest extends TestCase
 
         $course = Course::query()->where('title', 'Protected lesson')->firstOrFail();
 
-        Storage::disk('local')->assertExists($course->media_path);
-        Storage::disk('local')->assertExists($course->pdf_path);
-        Storage::disk('public')->assertMissing($course->media_path);
-        Storage::disk('public')->assertMissing($course->pdf_path);
-        $this->assertSame('local', $course->mediaDisk());
-        $this->assertSame('local', $course->pdfDisk());
+        Storage::disk('local')->assertExists($course->audio_path);
+        Storage::disk('public')->assertMissing($course->audio_path);
+        $this->assertSame('local', $course->audioDisk());
     }
 
-    public function test_updating_legacy_public_assets_moves_replacements_to_local_and_deletes_old_public_files(): void
+    public function test_updating_legacy_public_audio_moves_replacement_to_local_and_deletes_old_public_file(): void
     {
         Storage::fake('local');
         Storage::fake('public');
 
         $admin = User::factory()->admin()->create();
 
-        Storage::disk('public')->put('courses/media/legacy.mp4', 'legacy-video');
-        Storage::disk('public')->put('courses/pdf/legacy.pdf', 'legacy-pdf');
+        Storage::disk('public')->put('courses/audio/legacy.mp3', 'legacy-audio');
 
         $course = Course::create([
             'id' => (string) Str::uuid(),
@@ -58,9 +53,8 @@ class CourseProtectionTest extends TestCase
             'title' => 'Legacy lesson',
             'description' => 'Legacy',
             'content' => 'Legacy',
-            'media_path' => 'courses/media/legacy.mp4',
-            'media_mime' => 'video/mp4',
-            'pdf_path' => 'courses/pdf/legacy.pdf',
+            'audio_path' => 'courses/audio/legacy.mp3',
+            'audio_mime' => 'audio/mpeg',
             'sort_order' => 1,
             'is_active' => true,
         ]);
@@ -70,8 +64,7 @@ class CourseProtectionTest extends TestCase
             'category' => Course::CATEGORIES[0],
             'description' => 'Updated',
             'content' => 'Updated',
-            'media' => UploadedFile::fake()->create('replacement.mp4', 800, 'video/mp4'),
-            'pdf' => UploadedFile::fake()->create('replacement.pdf', 300, 'application/pdf'),
+            'audio' => UploadedFile::fake()->create('replacement.mp3', 800, 'audio/mpeg'),
             'is_active' => '1',
         ]);
 
@@ -79,21 +72,17 @@ class CourseProtectionTest extends TestCase
 
         $course->refresh();
 
-        Storage::disk('public')->assertMissing('courses/media/legacy.mp4');
-        Storage::disk('public')->assertMissing('courses/pdf/legacy.pdf');
-        Storage::disk('local')->assertExists($course->media_path);
-        Storage::disk('local')->assertExists($course->pdf_path);
-        $this->assertSame('local', $course->mediaDisk());
-        $this->assertSame('local', $course->pdfDisk());
+        Storage::disk('public')->assertMissing('courses/audio/legacy.mp3');
+        Storage::disk('local')->assertExists($course->audio_path);
+        $this->assertSame('local', $course->audioDisk());
     }
 
-    public function test_legacy_public_asset_paths_still_resolve_to_public_disk(): void
+    public function test_legacy_public_audio_path_still_resolves_to_public_disk(): void
     {
         Storage::fake('local');
         Storage::fake('public');
 
-        Storage::disk('public')->put('courses/media/legacy.mp4', 'legacy-video');
-        Storage::disk('public')->put('courses/pdf/legacy.pdf', 'legacy-pdf');
+        Storage::disk('public')->put('courses/audio/legacy.mp3', 'legacy-audio');
 
         $course = Course::create([
             'id' => (string) Str::uuid(),
@@ -101,15 +90,13 @@ class CourseProtectionTest extends TestCase
             'title' => 'Legacy lesson',
             'description' => 'Legacy',
             'content' => 'Legacy',
-            'media_path' => 'courses/media/legacy.mp4',
-            'media_mime' => 'video/mp4',
-            'pdf_path' => 'courses/pdf/legacy.pdf',
+            'audio_path' => 'courses/audio/legacy.mp3',
+            'audio_mime' => 'audio/mpeg',
             'sort_order' => 1,
             'is_active' => true,
         ]);
 
-        $this->assertSame('public', $course->mediaDisk());
-        $this->assertSame('public', $course->pdfDisk());
+        $this->assertSame('public', $course->audioDisk());
     }
 
     public function test_guest_cannot_access_protected_course_assets(): void
@@ -117,30 +104,23 @@ class CourseProtectionTest extends TestCase
         Storage::fake('local');
         $course = $this->makeProtectedCourse();
 
-        $this->get(route('courses.media', $course))
-            ->assertRedirect(route('login'));
-
-        $this->get(route('courses.pdf', $course))
+        $this->get(route('courses.audio', $course))
             ->assertRedirect(route('login'));
     }
 
     public function test_candidate_can_access_protected_local_assets_through_inline_routes(): void
     {
         Storage::fake('local');
-        $candidate = User::factory()->create();
+        $candidate = User::factory()->create([
+            'status' => 'active',
+        ]);
         $course = $this->makeProtectedCourse();
 
         $this->actingAs($candidate)
-            ->get(route('courses.media', $course))
+            ->get(route('courses.audio', $course))
             ->assertOk()
-            ->assertHeader('content-type', 'video/mp4')
-            ->assertHeader('content-disposition', 'inline; filename="lesson.mp4"');
-
-        $this->actingAs($candidate)
-            ->get(route('courses.pdf', $course))
-            ->assertOk()
-            ->assertHeader('content-type', 'application/pdf')
-            ->assertHeader('content-disposition', 'inline; filename="lesson.pdf"');
+            ->assertHeader('content-type', 'audio/mpeg')
+            ->assertHeader('content-disposition', 'inline; filename="lesson.mp3"');
     }
 
     public function test_admin_can_preview_protected_assets_from_course_management(): void
@@ -150,11 +130,7 @@ class CourseProtectionTest extends TestCase
         $course = $this->makeProtectedCourse();
 
         $this->actingAs($admin)
-            ->get(route('courses.media', $course))
-            ->assertOk();
-
-        $this->actingAs($admin)
-            ->get(route('courses.pdf', $course))
+            ->get(route('courses.audio', $course))
             ->assertOk();
     }
 
@@ -162,37 +138,34 @@ class CourseProtectionTest extends TestCase
     {
         Storage::fake('local');
         $course = $this->makeProtectedResourceCourse();
-        $video = $course->resources()->where('resource_type', CourseResource::TYPE_VIDEO)->firstOrFail();
+        $audio = $course->resources()->where('resource_type', CourseResource::TYPE_AUDIO)->firstOrFail();
 
-        $this->get(route('courses.resources.file', [$course, $video]))
+        $this->get(route('courses.resources.file', [$course, $audio]))
             ->assertRedirect(route('login'));
     }
 
     public function test_candidate_can_access_protected_child_resource_files_through_inline_route(): void
     {
         Storage::fake('local');
-        $candidate = User::factory()->create();
+        $candidate = User::factory()->create([
+            'status' => 'active',
+        ]);
         $course = $this->makeProtectedResourceCourse();
-        $video = $course->resources()->where('resource_type', CourseResource::TYPE_VIDEO)->firstOrFail();
-        $pdf = $course->resources()->where('resource_type', CourseResource::TYPE_PDF)->firstOrFail();
+        $audio = $course->resources()->where('resource_type', CourseResource::TYPE_AUDIO)->firstOrFail();
 
         $this->actingAs($candidate)
-            ->get(route('courses.resources.file', [$course, $video]))
+            ->get(route('courses.resources.file', [$course, $audio]))
             ->assertOk()
-            ->assertHeader('content-type', 'video/mp4')
-            ->assertHeader('content-disposition', 'inline; filename="chapter-video.mp4"');
-
-        $this->actingAs($candidate)
-            ->get(route('courses.resources.file', [$course, $pdf]))
-            ->assertOk()
-            ->assertHeader('content-type', 'application/pdf')
-            ->assertHeader('content-disposition', 'inline; filename="chapter-guide.pdf"');
+            ->assertHeader('content-type', 'audio/mpeg')
+            ->assertHeader('content-disposition', 'inline; filename="chapter-audio.mp3"');
     }
 
     public function test_candidate_course_page_uses_protected_asset_routes_not_public_storage_urls(): void
     {
         Storage::fake('local');
-        $candidate = User::factory()->create();
+        $candidate = User::factory()->create([
+            'status' => 'active',
+        ]);
         $course = $this->makeProtectedCourse();
 
         $this->actingAs($candidate)
@@ -200,38 +173,39 @@ class CourseProtectionTest extends TestCase
             ->withCookie('massar_locale', 'fr')
             ->get(route('courses.show', $course))
             ->assertOk()
-            ->assertSee(route('courses.media', $course), false)
-            ->assertSee('?resource=legacy-pdf#course-resource-viewer', false)
+            ->assertSee(route('courses.audio', $course, false), false)
+            ->assertSee('Non demarre')
             ->assertSee('data-protected-course-viewer', false)
             ->assertSee('data-course-resource-viewer', false)
             ->assertSee('controlsList="nodownload noplaybackrate"', false)
             ->assertSee('Supports du cours')
-            ->assertDontSee('/storage/courses/media', false)
-            ->assertDontSee('/storage/courses/pdf', false);
+                ->assertSee('Audio')
+                ->assertDontSee('/storage/courses/audio', false);
     }
 
     public function test_candidate_course_page_uses_protected_child_resource_routes_not_public_storage_urls(): void
     {
         Storage::fake('local');
-        $candidate = User::factory()->create();
+        $candidate = User::factory()->create([
+            'status' => 'active',
+        ]);
         $course = $this->makeProtectedResourceCourse();
-        $pdf = $course->resources()->where('resource_type', CourseResource::TYPE_PDF)->firstOrFail();
+        $audio = $course->resources()->where('resource_type', CourseResource::TYPE_AUDIO)->firstOrFail();
 
         $this->actingAs($candidate)
             ->withSession(['locale' => 'fr'])
             ->withCookie('massar_locale', 'fr')
-            ->get(route('courses.show', ['course' => $course, 'resource' => $pdf->id]))
+            ->get(route('courses.show', ['course' => $course, 'resource' => $audio->id]))
             ->assertOk()
-            ->assertSee('data-selected-resource-key="'.$pdf->id.'"', false)
-            ->assertSee(route('courses.resources.file', [$course, $pdf]), false)
+            ->assertSee('data-selected-resource-key="'.$audio->id.'"', false)
+            ->assertSee(route('courses.resources.file', [$course, $audio], false), false)
             ->assertSee('Supports du cours')
             ->assertDontSee('/storage/courses/protected/resources', false);
     }
 
     private function makeProtectedCourse(): Course
     {
-        Storage::disk('local')->put('courses/protected/media/lesson.mp4', 'video-data');
-        Storage::disk('local')->put('courses/protected/pdf/lesson.pdf', 'pdf-data');
+        Storage::disk('local')->put('courses/protected/audio/lesson.mp3', 'audio-data');
 
         return Course::create([
             'id' => (string) Str::uuid(),
@@ -239,9 +213,8 @@ class CourseProtectionTest extends TestCase
             'title' => 'Protected lesson',
             'description' => 'Protected description',
             'content' => 'Protected content',
-            'media_path' => 'courses/protected/media/lesson.mp4',
-            'media_mime' => 'video/mp4',
-            'pdf_path' => 'courses/protected/pdf/lesson.pdf',
+            'audio_path' => 'courses/protected/audio/lesson.mp3',
+            'audio_mime' => 'audio/mpeg',
             'sort_order' => 1,
             'is_active' => true,
         ]);
@@ -249,8 +222,7 @@ class CourseProtectionTest extends TestCase
 
     private function makeProtectedResourceCourse(): Course
     {
-        Storage::disk('local')->put('courses/protected/resources/video/chapter-video.mp4', 'video-data');
-        Storage::disk('local')->put('courses/protected/resources/pdf/chapter-guide.pdf', 'pdf-data');
+        Storage::disk('local')->put('courses/protected/resources/audio/chapter-audio.mp3', 'audio-data');
 
         $course = Course::create([
             'id' => (string) Str::uuid(),
@@ -273,20 +245,11 @@ class CourseProtectionTest extends TestCase
             ],
             [
                 'id' => (string) Str::uuid(),
-                'resource_type' => CourseResource::TYPE_VIDEO,
-                'title' => 'Vidéo protégée',
-                'file_path' => 'courses/protected/resources/video/chapter-video.mp4',
-                'file_mime' => 'video/mp4',
+                'resource_type' => CourseResource::TYPE_AUDIO,
+                'title' => 'Audio protégé',
+                'file_path' => 'courses/protected/resources/audio/chapter-audio.mp3',
+                'file_mime' => 'audio/mpeg',
                 'sort_order' => 2,
-                'is_active' => true,
-            ],
-            [
-                'id' => (string) Str::uuid(),
-                'resource_type' => CourseResource::TYPE_PDF,
-                'title' => 'PDF protégé',
-                'file_path' => 'courses/protected/resources/pdf/chapter-guide.pdf',
-                'file_mime' => 'application/pdf',
-                'sort_order' => 3,
                 'is_active' => true,
             ],
         ]);

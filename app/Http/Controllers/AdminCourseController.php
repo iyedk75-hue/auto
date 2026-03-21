@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\InteractsWithAdminScope;
 use App\Models\Course;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\MessageBag;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -12,15 +14,22 @@ use Illuminate\View\View;
 
 class AdminCourseController extends Controller
 {
+    use InteractsWithAdminScope;
+
     public function index(): View
     {
+        $admin = request()->user();
+
         return view('admin.courses.index', [
             'courses' => Course::query()
+                ->when($this->shouldScopeToSchool($admin), fn ($query) => $query->where('auto_school_id', $this->managedSchoolId($admin)))
                 ->withCount('resources')
+                ->with('autoSchool')
                 ->orderBy('sort_order')
                 ->orderByDesc('created_at')
                 ->paginate(12),
             'categoryLabels' => Course::categoryLabels(),
+            'admin' => $admin,
         ]);
     }
 
@@ -34,13 +43,18 @@ class AdminCourseController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $this->validateCourse($request);
+        if ($response = $this->rejectOversizedAudioUpload($request)) {
+            return $response;
+        }
 
-        $mediaPath = null;
-        $mediaMime = null;
-        if ($request->hasFile('media')) {
-            $mediaPath = $request->file('media')->store(Course::PROTECTED_MEDIA_DIRECTORY, 'local');
-            $mediaMime = $request->file('media')->getMimeType();
+        $validated = $this->validateCourse($request);
+        $admin = $request->user();
+
+        $audioPath = null;
+        $audioMime = null;
+        if ($request->hasFile('audio')) {
+            $audioPath = $request->file('audio')->store(Course::PROTECTED_AUDIO_DIRECTORY, 'local');
+            $audioMime = $request->file('audio')->getMimeType();
         }
 
         $coverPath = null;
@@ -48,13 +62,9 @@ class AdminCourseController extends Controller
             $coverPath = $request->file('cover')->store('courses/covers', 'public');
         }
 
-        $pdfPath = null;
-        if ($request->hasFile('pdf')) {
-            $pdfPath = $request->file('pdf')->store(Course::PROTECTED_PDF_DIRECTORY, 'local');
-        }
-
         Course::create([
             'id' => (string) Str::uuid(),
+            'auto_school_id' => $this->shouldScopeToSchool($admin) ? $this->managedSchoolId($admin) : null,
             'category' => $validated['category'],
             'title' => $validated['title'],
             'title_ar' => $validated['title_ar'] ?? null,
@@ -64,9 +74,8 @@ class AdminCourseController extends Controller
             'content_ar' => $validated['content_ar'] ?? null,
             'cover_path' => $coverPath,
             'duration_minutes' => $validated['duration_minutes'] ?? null,
-            'media_path' => $mediaPath,
-            'media_mime' => $mediaMime,
-            'pdf_path' => $pdfPath,
+            'audio_path' => $audioPath,
+            'audio_mime' => $audioMime,
             'sort_order' => $validated['sort_order'] ?? 0,
             'is_active' => $request->boolean('is_active'),
         ]);
@@ -78,6 +87,8 @@ class AdminCourseController extends Controller
 
     public function edit(Course $course): View
     {
+        $this->ensureManagedCourse(request()->user(), $course);
+
         return view('admin.courses.edit', [
             'course' => $course,
             'categories' => Course::categoryLabels(),
@@ -86,14 +97,20 @@ class AdminCourseController extends Controller
 
     public function update(Request $request, Course $course): RedirectResponse
     {
+        $this->ensureManagedCourse($request->user(), $course);
+
+        if ($response = $this->rejectOversizedAudioUpload($request)) {
+            return $response;
+        }
+
         $validated = $this->validateCourse($request);
 
-        $mediaPath = $course->media_path;
-        $mediaMime = $course->media_mime;
-        if ($request->hasFile('media')) {
-            $course->deleteMediaAsset();
-            $mediaPath = $request->file('media')->store(Course::PROTECTED_MEDIA_DIRECTORY, 'local');
-            $mediaMime = $request->file('media')->getMimeType();
+        $audioPath = $course->audio_path;
+        $audioMime = $course->audio_mime;
+        if ($request->hasFile('audio')) {
+            $course->deleteAudioAsset();
+            $audioPath = $request->file('audio')->store(Course::PROTECTED_AUDIO_DIRECTORY, 'local');
+            $audioMime = $request->file('audio')->getMimeType();
         }
 
         $coverPath = $course->cover_path;
@@ -102,12 +119,6 @@ class AdminCourseController extends Controller
                 Storage::disk('public')->delete($course->cover_path);
             }
             $coverPath = $request->file('cover')->store('courses/covers', 'public');
-        }
-
-        $pdfPath = $course->pdf_path;
-        if ($request->hasFile('pdf')) {
-            $course->deletePdfAsset();
-            $pdfPath = $request->file('pdf')->store(Course::PROTECTED_PDF_DIRECTORY, 'local');
         }
 
         $course->update([
@@ -120,9 +131,8 @@ class AdminCourseController extends Controller
             'content_ar' => $validated['content_ar'] ?? null,
             'cover_path' => $coverPath,
             'duration_minutes' => $validated['duration_minutes'] ?? null,
-            'media_path' => $mediaPath,
-            'media_mime' => $mediaMime,
-            'pdf_path' => $pdfPath,
+            'audio_path' => $audioPath,
+            'audio_mime' => $audioMime,
             'sort_order' => $validated['sort_order'] ?? 0,
             'is_active' => $request->boolean('is_active'),
         ]);
@@ -134,8 +144,13 @@ class AdminCourseController extends Controller
 
     public function destroy(Course $course): RedirectResponse
     {
-        $course->deleteMediaAsset();
-        $course->deletePdfAsset();
+        $this->ensureManagedCourse(request()->user(), $course);
+
+        $course->resources()->get()->each(function ($resource) {
+            $resource->deleteFileAsset();
+        });
+
+        $course->deleteAudioAsset();
 
         if ($course->cover_path) {
             Storage::disk('public')->delete($course->cover_path);
@@ -161,9 +176,68 @@ class AdminCourseController extends Controller
             'duration_minutes' => ['nullable', 'integer', 'min:1'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'cover' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
-            'media' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,mp4,webm', 'max:51200'],
-            'pdf' => ['nullable', 'file', 'mimes:pdf', 'max:20480'],
+            'audio' => ['nullable', 'file', 'mimes:mp3,wav,ogg,m4a,aac', 'max:'.Course::AUDIO_MAX_KB],
             'is_active' => ['nullable', 'boolean'],
         ]);
+    }
+
+    private function ensureManagedCourse($admin, Course $course): void
+    {
+        if ($this->shouldScopeToSchool($admin)) {
+            abort_unless((int) $course->auto_school_id === $this->managedSchoolId($admin), 403);
+        }
+    }
+
+    private function rejectOversizedAudioUpload(Request $request): ?RedirectResponse
+    {
+        if ($this->requestExceededPostMaxSize($request) || $this->audioUploadFailedDueToPhpLimit()) {
+            return back()
+                ->withInput()
+                ->withErrors(new MessageBag([
+                    'audio' => __('ui.admin_courses.audio_upload_too_large', [
+                        'size' => ini_get('upload_max_filesize') ?: '2M',
+                    ]),
+                ]));
+        }
+
+        return null;
+    }
+
+    private function requestExceededPostMaxSize(Request $request): bool
+    {
+        $contentLength = (int) ($request->server('CONTENT_LENGTH') ?? 0);
+        $postMaxSize = $this->normalizeIniSizeToBytes((string) ini_get('post_max_size'));
+
+        return $contentLength > 0 && $postMaxSize > 0 && $contentLength > $postMaxSize;
+    }
+
+    private function audioUploadFailedDueToPhpLimit(): bool
+    {
+        $audioFile = $_FILES['audio'] ?? null;
+
+        if (! is_array($audioFile)) {
+            return false;
+        }
+
+        return in_array((int) ($audioFile['error'] ?? UPLOAD_ERR_OK), [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true);
+    }
+
+    private function normalizeIniSizeToBytes(string $size): int
+    {
+        $size = trim($size);
+
+        if ($size === '') {
+            return 0;
+        }
+
+        $unit = strtolower(substr($size, -1));
+        $value = (float) $size;
+
+        return match ($unit) {
+            'g' => (int) ($value * 1024 * 1024 * 1024),
+            'm' => (int) ($value * 1024 * 1024),
+            'k' => (int) ($value * 1024),
+            default => (int) $value,
+        };
     }
 }

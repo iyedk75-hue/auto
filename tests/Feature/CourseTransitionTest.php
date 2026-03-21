@@ -12,7 +12,7 @@ class CourseTransitionTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_legacy_course_resolves_media_and_pdf_into_a_usable_resource_list(): void
+    public function test_legacy_course_resolves_audio_into_a_usable_resource_list(): void
     {
         $course = Course::create([
             'id' => (string) Str::uuid(),
@@ -21,19 +21,18 @@ class CourseTransitionTest extends TestCase
             'title_ar' => 'قواعد الأولوية',
             'description' => 'Description',
             'content' => 'Contenu',
-            'media_path' => 'courses/protected/media/legacy-video.mp4',
-            'media_mime' => 'video/mp4',
-            'pdf_path' => 'courses/protected/pdf/legacy-guide.pdf',
+            'audio_path' => 'courses/protected/audio/legacy-audio.mp3',
+            'audio_mime' => 'audio/mpeg',
             'sort_order' => 0,
             'is_active' => true,
         ]);
 
         $resolved = $course->resolvedResources();
 
-        $this->assertCount(2, $resolved);
-        $this->assertSame(['legacy-media', 'legacy-pdf'], array_column($resolved->all(), 'key'));
-        $this->assertSame(['legacy', 'legacy'], array_column($resolved->all(), 'origin'));
-        $this->assertSame([CourseResource::TYPE_VIDEO, CourseResource::TYPE_PDF], array_column($resolved->all(), 'type'));
+        $this->assertCount(1, $resolved);
+        $this->assertSame(['legacy-audio'], array_column($resolved->all(), 'key'));
+        $this->assertSame(['legacy'], array_column($resolved->all(), 'origin'));
+        $this->assertSame([CourseResource::TYPE_AUDIO], array_column($resolved->all(), 'type'));
     }
 
     public function test_persisted_child_resources_take_precedence_over_legacy_fields(): void
@@ -44,9 +43,8 @@ class CourseTransitionTest extends TestCase
             'title' => 'Priority rules',
             'description' => 'Description',
             'content' => 'Contenu',
-            'media_path' => 'courses/protected/media/legacy-video.mp4',
-            'media_mime' => 'video/mp4',
-            'pdf_path' => 'courses/protected/pdf/legacy-guide.pdf',
+            'audio_path' => 'courses/protected/audio/legacy-audio.mp3',
+            'audio_mime' => 'audio/mpeg',
             'sort_order' => 0,
             'is_active' => true,
         ]);
@@ -62,10 +60,10 @@ class CourseTransitionTest extends TestCase
             ],
             [
                 'id' => (string) Str::uuid(),
-                'resource_type' => CourseResource::TYPE_VIDEO,
-                'title' => 'Vidéo 1',
-                'file_path' => 'courses/protected/media/video-1.mp4',
-                'file_mime' => 'video/mp4',
+                'resource_type' => CourseResource::TYPE_AUDIO,
+                'title' => 'Audio 1',
+                'file_path' => 'courses/protected/resources/audio/audio-1.mp3',
+                'file_mime' => 'audio/mpeg',
                 'sort_order' => 1,
                 'is_active' => true,
             ],
@@ -75,7 +73,7 @@ class CourseTransitionTest extends TestCase
 
         $this->assertCount(2, $resolved);
         $this->assertSame(['resource', 'resource'], array_column($resolved->all(), 'origin'));
-        $this->assertSame(['Vidéo 1', 'Chapitre I'], array_column($resolved->all(), 'title'));
+        $this->assertSame(['Audio 1', 'Chapitre I'], array_column($resolved->all(), 'title'));
         $this->assertSame([1, 2], array_column($resolved->all(), 'sort_order'));
     }
 
@@ -105,11 +103,11 @@ class CourseTransitionTest extends TestCase
             ],
             [
                 'id' => (string) Str::uuid(),
-                'resource_type' => CourseResource::TYPE_PDF,
-                'title' => 'Fiche PDF',
-                'title_ar' => 'ملف PDF',
-                'file_path' => 'courses/protected/pdf/guide.pdf',
-                'file_mime' => 'application/pdf',
+                'resource_type' => CourseResource::TYPE_AUDIO,
+                'title' => 'Audio guide',
+                'title_ar' => 'دليل صوتي',
+                'file_path' => 'courses/protected/resources/audio/guide.mp3',
+                'file_mime' => 'audio/mpeg',
                 'sort_order' => 2,
                 'is_active' => true,
             ],
@@ -133,7 +131,7 @@ class CourseTransitionTest extends TestCase
 
         $this->assertTrue($resolved[1]['is_file']);
         $this->assertFalse($resolved[1]['is_note']);
-        $this->assertSame('application/pdf', $resolved[1]['file_mime']);
-        $this->assertSame(CourseResource::TYPE_PDF, $resolved[1]['type']);
+        $this->assertSame('audio/mpeg', $resolved[1]['file_mime']);
+        $this->assertSame(CourseResource::TYPE_AUDIO, $resolved[1]['type']);
     }
 }

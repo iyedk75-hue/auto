@@ -33,8 +33,8 @@
                                 @endif
                                 <div class="flex items-center justify-between text-xs font-semibold text-slate-400">
                                     <span>{{ $course->duration_minutes ? $course->duration_minutes.' min' : __('ui.classroom.free_duration') }}</span>
-                                    @if ($course->pdf_path)
-                                        <span>{{ __('ui.classroom.pdf_included') }}</span>
+                                    @if ($course->hasAudioMedia())
+                                        <span>{{ __('ui.classroom.audio_included') }}</span>
                                     @endif
                                 </div>
                             </div>

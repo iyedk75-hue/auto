@@ -30,6 +30,15 @@ class DatabaseSeeder extends Seeder
         ]);
 
         User::updateOrCreate([
+            'email' => 'superadmin@massar.test',
+        ], [
+            'name' => 'Super Admin Massar',
+            'role' => User::ROLE_SUPER_ADMIN,
+            'auto_school_id' => null,
+            'password' => 'password',
+        ]);
+
+        User::updateOrCreate([
             'email' => 'admin@massar.test',
         ], [
             'name' => 'Responsable Massar',

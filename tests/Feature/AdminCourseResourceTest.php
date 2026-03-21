@@ -52,9 +52,8 @@ class AdminCourseResourceTest extends TestCase
         $admin = User::factory()->admin()->create();
         $legacyCourse = $this->makeCourse(title: 'Cours legacy');
         $legacyCourse->update([
-            'media_path' => 'courses/protected/media/legacy-video.mp4',
-            'media_mime' => 'video/mp4',
-            'pdf_path' => 'courses/protected/pdf/legacy.pdf',
+            'audio_path' => 'courses/protected/audio/legacy-audio.mp3',
+            'audio_mime' => 'audio/mpeg',
         ]);
 
         $resourceCourse = $this->makeCourse(title: 'Cours ressources');
@@ -110,7 +109,7 @@ class AdminCourseResourceTest extends TestCase
         ]);
     }
 
-    public function test_admin_can_create_pdf_resource_with_protected_file_storage(): void
+    public function test_admin_can_create_audio_resource_with_protected_file_storage(): void
     {
         Storage::fake('local');
 
@@ -118,10 +117,10 @@ class AdminCourseResourceTest extends TestCase
         $course = $this->makeCourse();
 
         $response = $this->actingAs($admin)->post(route('admin.courses.resources.store', $course), [
-            'resource_type' => CourseResource::TYPE_PDF,
-            'title' => 'Support PDF',
+            'resource_type' => CourseResource::TYPE_AUDIO,
+            'title' => 'Support audio',
             'sort_order' => 1,
-            'resource_file' => UploadedFile::fake()->create('support.pdf', 200, 'application/pdf'),
+            'resource_file' => UploadedFile::fake()->create('support.mp3', 200, 'audio/mpeg'),
             'is_active' => '1',
         ]);
 
@@ -130,8 +129,8 @@ class AdminCourseResourceTest extends TestCase
         $resource = CourseResource::query()->where('course_id', $course->id)->firstOrFail();
 
         Storage::disk('local')->assertExists($resource->file_path);
-        $this->assertSame(CourseResource::TYPE_PDF, $resource->resource_type);
-        $this->assertSame('application/pdf', $resource->file_mime);
+        $this->assertSame(CourseResource::TYPE_AUDIO, $resource->resource_type);
+        $this->assertSame('audio/mpeg', $resource->file_mime);
     }
 
     public function test_admin_can_update_resource_order_and_replace_file_when_type_stays_file(): void
@@ -141,32 +140,32 @@ class AdminCourseResourceTest extends TestCase
         $admin = User::factory()->admin()->create();
         $course = $this->makeCourse();
 
-        Storage::disk('local')->put('courses/protected/resources/video/legacy-video.mp4', 'legacy-video');
+        Storage::disk('local')->put('courses/protected/resources/audio/legacy-audio.mp3', 'legacy-audio');
 
         $resource = $course->resources()->create([
             'id' => (string) Str::uuid(),
-            'resource_type' => CourseResource::TYPE_VIDEO,
-            'title' => 'Vidéo 1',
-            'file_path' => 'courses/protected/resources/video/legacy-video.mp4',
-            'file_mime' => 'video/mp4',
+            'resource_type' => CourseResource::TYPE_AUDIO,
+            'title' => 'Audio 1',
+            'file_path' => 'courses/protected/resources/audio/legacy-audio.mp3',
+            'file_mime' => 'audio/mpeg',
             'sort_order' => 3,
             'is_active' => true,
         ]);
 
         $response = $this->actingAs($admin)->put(route('admin.courses.resources.update', [$course, $resource]), [
-            'resource_type' => CourseResource::TYPE_VIDEO,
-            'title' => 'Vidéo 1 modifiée',
+            'resource_type' => CourseResource::TYPE_AUDIO,
+            'title' => 'Audio 1 modifié',
             'sort_order' => 1,
-            'resource_file' => UploadedFile::fake()->create('new-video.mp4', 1000, 'video/mp4'),
+            'resource_file' => UploadedFile::fake()->create('new-audio.mp3', 1000, 'audio/mpeg'),
             'is_active' => '1',
         ]);
 
         $response->assertRedirect(route('admin.courses.resources.index', $course));
-        Storage::disk('local')->assertMissing('courses/protected/resources/video/legacy-video.mp4');
+        Storage::disk('local')->assertMissing('courses/protected/resources/audio/legacy-audio.mp3');
 
         $resource->refresh();
 
-        $this->assertSame('Vidéo 1 modifiée', $resource->title);
+        $this->assertSame('Audio 1 modifié', $resource->title);
         $this->assertSame(1, $resource->sort_order);
         Storage::disk('local')->assertExists($resource->file_path);
     }
@@ -178,14 +177,14 @@ class AdminCourseResourceTest extends TestCase
         $admin = User::factory()->admin()->create();
         $course = $this->makeCourse();
 
-        Storage::disk('local')->put('courses/protected/resources/pdf/to-delete.pdf', 'pdf');
+        Storage::disk('local')->put('courses/protected/resources/audio/to-delete.mp3', 'audio');
 
         $resource = $course->resources()->create([
             'id' => (string) Str::uuid(),
-            'resource_type' => CourseResource::TYPE_PDF,
-            'title' => 'PDF 1',
-            'file_path' => 'courses/protected/resources/pdf/to-delete.pdf',
-            'file_mime' => 'application/pdf',
+            'resource_type' => CourseResource::TYPE_AUDIO,
+            'title' => 'Audio 1',
+            'file_path' => 'courses/protected/resources/audio/to-delete.mp3',
+            'file_mime' => 'audio/mpeg',
             'sort_order' => 1,
             'is_active' => true,
         ]);
@@ -194,7 +193,7 @@ class AdminCourseResourceTest extends TestCase
 
         $response->assertRedirect(route('admin.courses.resources.index', $course));
         $this->assertDatabaseMissing('course_resources', ['id' => $resource->id]);
-        Storage::disk('local')->assertMissing('courses/protected/resources/pdf/to-delete.pdf');
+        Storage::disk('local')->assertMissing('courses/protected/resources/audio/to-delete.mp3');
     }
 
     private function makeCourse(string $title = 'Cours ressources'): Course
